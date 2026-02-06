@@ -1,9 +1,9 @@
-import React from "react";
+import React, { type FC } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 import { Navigate, Outlet } from "react-router-dom";
 
-const ProtectedRoute = () => {
+const ProtectedRoute: FC = () => {
   const token = useSelector((state: RootState) => state.auth.token);
 
   // Если токена нет, перенаправляем на логин

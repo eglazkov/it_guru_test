@@ -4,6 +4,7 @@ import React, {
   type FC,
   type HTMLInputTypeAttribute,
 } from "react";
+
 import { cn } from "../../lib/utils";
 import Label from "../Label";
 import LockIcon from "../../assets/LockIcon.svg?react";
@@ -20,6 +21,7 @@ interface InputProps {
   label?: string;
   placeholder?: string;
   className?: string;
+  clearable?: boolean;
 }
 
 const Input: FC<InputProps> = ({
@@ -31,6 +33,7 @@ const Input: FC<InputProps> = ({
   label,
   placeholder,
   className,
+  clearable = false,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [currentType, setCurrentType] = useState<
@@ -47,7 +50,6 @@ const Input: FC<InputProps> = ({
       const event = new Event("input", { bubbles: true });
       inputRef.current.dispatchEvent(event);
     }
-    // onChange();
   };
 
   return (
@@ -68,7 +70,7 @@ const Input: FC<InputProps> = ({
         <input
           ref={inputRef}
           placeholder={placeholder}
-          className="text-[18px] py-16 px-14 pl-54 w-full rounded-[12px] border-2 border-[#EDEDED]"
+          className="bg-[#FFFFFF] text-[18px] py-16 px-14 pl-54 w-full rounded-[12px] border-2 border-[#EDEDED]"
           name={name}
           type={currentType}
           id={id}
@@ -77,7 +79,7 @@ const Input: FC<InputProps> = ({
           autoComplete="off"
         />
         <div className="absolute inset-y-0 right-16 flex items-center pl-3 cursor-pointer">
-          {type === "email" && <CloseIcon onClick={clearValue} />}
+          {clearable && <CloseIcon onClick={clearValue} />}
           {type === "password" && <EyeOffIcon onClick={showPasswordToggle} />}
         </div>
       </div>

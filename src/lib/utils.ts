@@ -34,3 +34,33 @@ export function isErrorWithMessage(
     typeof (error as any).message === "string"
   );
 }
+
+export const cleanParams = <T extends object>(params: T): Partial<T> =>
+  Object.fromEntries(
+    Object.entries(params).filter(
+      ([, value]) => value !== undefined && value !== null && value !== "",
+    ),
+  ) as Partial<T>;
+
+export const toSearchParams = (obj: Record<string, any>): string => {
+  const params = new URLSearchParams();
+
+  Object.entries(obj).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      params.append(key, String(value));
+    }
+  });
+
+  return params.toString();
+};
+
+export const debounceFn = <F extends (...args: any[]) => void>(
+  func: F,
+  delay: number,
+) => {
+  let timer: ReturnType<typeof setTimeout>;
+  return function (...args: Parameters<F>) {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(...args), delay);
+  };
+};

@@ -16,6 +16,13 @@
 @utility inter {
   font-family: var(--font-inter);
 }
+@layer utilities {
+  .w-fill {
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: fill-available;
+  }
+}
 
 :root {
   font-family: var(--font-inter);

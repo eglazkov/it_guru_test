@@ -8,33 +8,37 @@ import { isFetchBaseQueryError, isSerializedError } from "../lib/utils";
 export interface AuthData {
   email: string;
   password: string;
-  isRemind: boolean;
+  isRememberMe: boolean;
   onEmailChange: (email: string) => void;
   onPasswordChange: (password: string) => void;
   onRemindChange: (isRemind: boolean) => void;
-  onSubmit: () => void;
+  onSubmit: (rememberme: boolean) => void;
 }
 
+// TODO: прикрутить логику с refreshToken
 export const useAuth = (): AuthData => {
   const navigate = useNavigate();
   const [authUser] = useAuthUserMutation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isRemind, setIsRemind] = useState(false);
+  const [isRememberMe, setIsRememberMe] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (rememberme: boolean) => {
     try {
       const response = await authUser({
-        username: getUserLoginByEmail(email),
-        password,
-        expiresInMins: 10,
+        credentials: {
+          username: getUserLoginByEmail(email),
+          password,
+          expiresInMins: 15,
+        },
+        rememberme,
       }).unwrap();
 
       toast.success("Добро пожаловать!");
-      const storage = isRemind ? localStorage : sessionStorage;
+      const storage = isRememberMe ? localStorage : sessionStorage;
       storage.setItem("token", response.refreshToken);
-      navigate("/home");
+      navigate("/products");
     } catch (error) {
       // Ваша обработка ошибок...
       if (isFetchBaseQueryError(error)) {
@@ -42,7 +46,7 @@ export const useAuth = (): AuthData => {
       } else if (isSerializedError(error)) {
         toast.error(error.message || "Ошибка");
       } else {
-        toast.error("Системная ошибка");
+        toast.error(`Системная ошибка\n${error}`);
       }
     }
   };
@@ -50,10 +54,10 @@ export const useAuth = (): AuthData => {
   return {
     email,
     password,
-    isRemind,
+    isRememberMe,
     onEmailChange: setEmail,
     onPasswordChange: setPassword,
-    onRemindChange: setIsRemind,
+    onRemindChange: setIsRememberMe,
     onSubmit: handleSubmit,
   };
 };

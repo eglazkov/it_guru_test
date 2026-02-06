@@ -20,7 +20,7 @@ const AuthPage: FC<AuthPageProps> = ({ data }) => {
             className="mb-16"
             onSubmit={(e) => {
               e.preventDefault();
-              data.onSubmit();
+              data.onSubmit(data.isRememberMe);
             }}
           >
             <div className="text-[40px] font-semibold mb-12">
@@ -42,6 +42,7 @@ const AuthPage: FC<AuthPageProps> = ({ data }) => {
                 type="email"
                 value={data.email}
                 onChange={(e) => data.onEmailChange(e.target.value)}
+                clearable
               />
               <Input
                 className="mb-20"
@@ -55,10 +56,10 @@ const AuthPage: FC<AuthPageProps> = ({ data }) => {
               />
               <CheckBox
                 className="mb-20"
-                id="remindme"
+                id="rememberMe"
                 label="Запомнить данные"
-                name="remindme"
-                checked={data.isRemind}
+                name="rememberMe"
+                checked={data.isRememberMe}
                 onChange={(e) => data.onRemindChange(e.target.checked)}
               />
               <Button type="submit">Войти</Button>

@@ -1,11 +1,16 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { User } from "../../types/user";
 
-interface AuthRequest {
-  username: string;
-  password: string;
-  expiresInMins?: number;
-}
+type AuthRequest = {
+  credentials: {
+    username: string;
+    password: string;
+    expiresInMins?: number;
+  };
+  rememberme: boolean;
+};
+
+type AuthResponse = User;
 
 export const userApi = createApi({
   reducerPath: "userApi",
@@ -15,25 +20,23 @@ export const userApi = createApi({
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    // credentials: "include",
   }),
   endpoints: (builder) => ({
-    authUser: builder.mutation<User, AuthRequest>({
-      query: (credentials) => ({
+    authUser: builder.mutation<AuthResponse, AuthRequest>({
+      query: ({ credentials }) => ({
         url: "auth/login",
         method: "POST",
         body: credentials,
       }),
-      transformResponse: (response: unknown) => {
+      transformResponse: (response: AuthResponse) => {
         if (typeof response === "string") {
           try {
             return JSON.parse(response);
           } catch (e) {
-            console.error("Failed to parse response:", e);
-            return;
+            throw new Error(`Failed to parse response: ${e}`);
           }
         } else {
-          return response as User;
+          return response;
         }
       },
     }),

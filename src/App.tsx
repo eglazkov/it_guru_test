@@ -1,5 +1,9 @@
 import { Toaster } from "react-hot-toast";
-import { AuthPageContainer, HomePageContainer, NotFoundPage } from "./pages";
+import {
+  AuthPageContainer,
+  ProductsPageContainer,
+  NotFoundPage,
+} from "./pages";
 import { ReduxProvider } from "./store/ReduxProvider";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components";
@@ -13,9 +17,9 @@ function App() {
           <Routes>
             <Route path="/login" element={<AuthPageContainer />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/home" element={<HomePageContainer />} />
+              <Route path="/products" element={<ProductsPageContainer />} />
             </Route>
-            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/" element={<Navigate to="/products" replace />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>

@@ -1,6 +1,10 @@
 export { default as Input } from "./Input";
+export { default as InputSearch } from "./InputSearch";
 export { default as CheckBox } from "./CheckBox";
 export { default as Label } from "./Label";
 export { default as Button } from "./Button";
+export { default as Table } from "./Table";
+export { default as Pagination } from "./Pagination";
 export { default as Logo } from "./Logo";
 export { default as ProtectedRoute } from "./ProtectedRoute";
+export { default as FormattedAmount } from "./FormattedAmount";

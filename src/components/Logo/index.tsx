@@ -1,7 +1,7 @@
-import React from "react";
+import React, { type FC } from "react";
 import LogoIcon from "../../assets/Logo.svg?react";
 
-const Logo = () => {
+const Logo: FC = () => {
   return (
     <div className="rounded-[100px] shadow-[0_12px_8px_2px_rgba(0,0,0,0.03)] mb-32">
       <div

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { userApi } from "../api/userApi"; // импортируйте ваш API
+import { userApi } from "../api/userApi";
 import type { User } from "../../types/user";
 
 interface InitialState {
