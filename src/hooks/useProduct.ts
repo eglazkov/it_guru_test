@@ -58,7 +58,8 @@ export const useProduct = (): ProductData<Product> => {
 
   useEffect(() => {
     trigger(filterParams);
-  }, [filterParams, trigger]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterParams]);
 
   useEffect(() => {
     if (isFirstRender.current) {

@@ -101,7 +101,10 @@ const AddRow = <T extends Record<string, any>>({
       ))}
       <td className="text-end">
         <button
-          className="inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center mr-32"
+          className={cn(
+            "inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center mr-32",
+            "hover:bg-[#1E26C2] active:bg-[#191FB0] focus:ring-2 focus:ring-[#242EDB]/50 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl",
+          )}
           onClick={() => {
             if (!isValidInput()) {
               return;
@@ -112,7 +115,10 @@ const AddRow = <T extends Record<string, any>>({
           <SuccessIcon className="stroke-current text-green-500" />
         </button>
         <button
-          className="inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center mr-8"
+          className={cn(
+            "inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center mr-8",
+            "hover:bg-[#1E26C2] active:bg-[#191FB0] focus:ring-2 focus:ring-[#242EDB]/50 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl",
+          )}
           onClick={onCancel}
         >
           <CancelIcon className="stroke-current text-red-500" />

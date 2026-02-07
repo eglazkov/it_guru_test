@@ -6,8 +6,8 @@ import { Navigate } from "react-router-dom";
 
 const AuthPageContainer = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-
   const authData = useAuth();
+
   if (user) {
     return <Navigate to="/products" replace />;
   }

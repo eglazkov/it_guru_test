@@ -301,7 +301,7 @@ const Table = <T extends Record<string, any>>({
             </Button>
             {onAddRow && (
               <Button className="w-fit py-16 px-20" onClick={addRow}>
-                <div className="flex flex-row gap-15 items-center ">
+                <div className="flex flex-row gap-15 items-center">
                   <PlusIcon className="fill-[#FFFFFF]" />
                   Добавить
                 </div>
@@ -471,7 +471,10 @@ const Table = <T extends Record<string, any>>({
                       <div className="flex flex-row items-center gap-32 mr-8 justify-end">
                         {onEditRow && (
                           <button
-                            className="inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center"
+                            className={cn(
+                              "inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center",
+                              "hover:bg-[#1E26C2] active:bg-[#191FB0] focus:ring-2 focus:ring-[#242EDB]/50 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl",
+                            )}
                             onClick={() => editRow(row.id as number)}
                           >
                             <PlusSingIcon />

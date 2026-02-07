@@ -15,13 +15,15 @@ function App() {
 
   useEffect(() => {
     getUser();
-  }, [getUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !data) {
       navigate("/login");
     }
-  }, [isLoading, data, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, data]);
 
   return (
     <>
