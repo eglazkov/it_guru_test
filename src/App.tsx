@@ -15,11 +15,13 @@ function App() {
 
   useEffect(() => {
     getUser();
-  }, []);
+  }, [getUser]);
 
   useEffect(() => {
-    !isLoading && !data && navigate("/login");
-  }, [isLoading, data]);
+    if (!isLoading && !data) {
+      navigate("/login");
+    }
+  }, [isLoading, data, navigate]);
 
   return (
     <>

@@ -18,7 +18,6 @@ export const store = configureStore({
       .concat(logger)
       .concat(userApi.middleware)
       .concat(productApi.middleware),
-  // .concat(tariffsApi.middleware),
 });
 
 setupListeners(store.dispatch);

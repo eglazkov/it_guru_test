@@ -1,7 +1,6 @@
 import React, { type FC } from "react";
 import { cn } from "../../lib/utils";
-
-type Level = "low" | "medium" | "high";
+import type { Level } from "../../types/product";
 
 interface LevelBarsProps {
   level: Level;
@@ -29,19 +28,6 @@ const LevelBars: FC<LevelBarsProps> = ({ level }) => {
       ))}
     </div>
   );
-};
-
-const range = {
-  low: [0, 40],
-  medium: [41, 80],
-  high: [81, 100],
-};
-const ranges = Object.entries(range);
-
-export const getLevel = (count: string | number): Level => {
-  return ranges.find(
-    ([key, [min, max]]) => Number(count) >= min && Number(count) <= max,
-  )?.[0] as Level;
 };
 
 export default LevelBars;

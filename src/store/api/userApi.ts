@@ -33,7 +33,7 @@ const rawBaseQuery = fetchBaseQuery({
   },
   // вызывает cors ошибку с include, мб стоит вызывать через прокси
   credentials: "omit",
-  prepareHeaders: (headers, { getState, endpoint }) => {
+  prepareHeaders: (headers, { getState }) => {
     const accessToken = (getState() as RootState).auth.accessToken;
     if (accessToken) {
       headers.set("Authorization", `Bearer ${accessToken}`);
@@ -66,7 +66,6 @@ export const userApi = createApi({
         if (refreshResult) {
           result = await rawBaseQuery(args, api, extraOptions); // retry
         }
-      } else {
       }
     }
 

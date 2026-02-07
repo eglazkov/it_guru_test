@@ -3,12 +3,9 @@ import {
   fetchBaseQuery,
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
-import type { User } from "../../types/user";
 import type { Product } from "../../types/product";
 import type { RootState } from "../store";
 import { cleanParams, toSearchParams } from "../../lib/utils";
-
-type ProtuctsRequest = {};
 
 export type ProductsResponse = {
   products: Product[];
@@ -101,9 +98,9 @@ export const productApi = createApi({
       ProductsResponse,
       SearchProductsUniversalRequest
     >({
-      queryFn: async (params, { signal }, _, baseQuery) => {
+      queryFn: async (params, _2, _3, baseQuery) => {
         let url: string;
-        const searchParams = toSearchParams(params);
+        const searchParams = toSearchParams(params as Record<string, unknown>);
         if (params.q) {
           url = `/products/search?${searchParams}`;
         } else {

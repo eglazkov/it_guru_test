@@ -43,3 +43,5 @@ interface Dimensions {
   height: number;
   depth: number;
 }
+
+export type Level = "low" | "medium" | "high";

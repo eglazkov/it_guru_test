@@ -23,7 +23,7 @@ import type {
 } from "../components/Table";
 import toast from "react-hot-toast";
 
-export interface ProductData<T extends Record<string, any>> {
+export interface ProductData<T = Product> {
   searchValue: string;
   products: Product[];
   filterParams: SearchProductsUniversalRequest;
@@ -58,7 +58,7 @@ export const useProduct = (): ProductData<Product> => {
 
   useEffect(() => {
     trigger(filterParams);
-  }, [filterParams]);
+  }, [filterParams, trigger]);
 
   useEffect(() => {
     if (isFirstRender.current) {

@@ -1,27 +1,21 @@
-import React, { useCallback, useState, type FC } from "react";
+import { useCallback, useState } from "react";
 import Input from "../Input";
-import Button from "../Button";
 import SuccessIcon from "../../assets/SuccessIcon.svg?react";
 import CancelIcon from "../../assets/CancelIcon.svg?react";
-import PlusSingIcon from "../../assets/PlusSingIcon.svg?react";
-import {
-  areFieldsNonEmpty,
-  cn,
-  hasFalseValue,
-  hasTrueValue,
-} from "../../lib/utils";
+import { cn, hasTrueValue } from "../../lib/utils";
 
 interface AddRowProps<T> {
   columns: T[];
   editableFields?: string[];
   requiredFields?: string[];
-  editRowData?: Record<string, string>;
+  editRowData?: Record<string, string | number>;
   widths: Record<keyof T & string, number>;
   isLoading?: boolean;
-  onAdd: (row: Partial<Record<string, string>>) => void;
+  onAdd: (row: Partial<Record<string, string | number>>) => void;
   onCancel: () => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AddRow = <T extends Record<string, any>>({
   columns,
   editableFields = [],
@@ -32,7 +26,7 @@ const AddRow = <T extends Record<string, any>>({
   onAdd,
   onCancel,
 }: AddRowProps<T>) => {
-  const [row, setRow] = useState<Partial<Record<string, string>>>(
+  const [row, setRow] = useState<Partial<Record<string, string | number>>>(
     editRowData ||
       columns.reduce(
         (acc, cur) => {
@@ -51,7 +45,7 @@ const AddRow = <T extends Record<string, any>>({
 
     const notValid = requiredFields.reduce(
       (acc, cur) => {
-        acc[cur] = !Boolean(row[cur]);
+        acc[cur] = !row[cur] ? true : false;
         return acc;
       },
       {} as Partial<Record<string, boolean>>,
@@ -61,7 +55,8 @@ const AddRow = <T extends Record<string, any>>({
       ...notValid,
     }));
     return !hasTrueValue(notValid);
-  }, [row]);
+  }, [row, requiredFields]);
+
   return (
     <tr
       className={cn(
@@ -94,7 +89,7 @@ const AddRow = <T extends Record<string, any>>({
             kind="small"
             id={`add-${column.key}`}
             placeholder={column.title}
-            value={row[column.key] || ""}
+            value={(row[column.key] as string) || ""}
             onChange={(e) => {
               setRow((prev) => ({
                 ...prev,

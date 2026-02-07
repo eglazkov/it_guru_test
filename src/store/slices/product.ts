@@ -1,6 +1,5 @@
 import { createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { productApi, type ProductsResponse } from "../api/productApi";
-import type { User } from "../../types/user";
 
 type InitialState = ProductsResponse;
 

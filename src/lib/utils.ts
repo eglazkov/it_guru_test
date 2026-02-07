@@ -2,6 +2,7 @@ import type { SerializedError } from "@reduxjs/toolkit";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { Level } from "../types/product";
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -24,17 +25,6 @@ export function isFetchBaseQueryError(
   return typeof error === "object" && error != null && "status" in error;
 }
 
-export function isErrorWithMessage(
-  error: unknown,
-): error is { message: string } {
-  return (
-    typeof error === "object" &&
-    error != null &&
-    "message" in error &&
-    typeof (error as any).message === "string"
-  );
-}
-
 export const cleanParams = <T extends object>(params: T): Partial<T> =>
   Object.fromEntries(
     Object.entries(params).filter(
@@ -42,7 +32,7 @@ export const cleanParams = <T extends object>(params: T): Partial<T> =>
     ),
   ) as Partial<T>;
 
-export const toSearchParams = (obj: Record<string, any>): string => {
+export const toSearchParams = (obj: Record<string, unknown>): string => {
   const params = new URLSearchParams();
 
   Object.entries(obj).forEach(([key, value]) => {
@@ -54,7 +44,7 @@ export const toSearchParams = (obj: Record<string, any>): string => {
   return params.toString();
 };
 
-export const debounceFn = <F extends (...args: any[]) => void>(
+export const debounceFn = <F extends (...args: unknown[]) => void>(
   func: F,
   delay: number,
 ) => {
@@ -75,3 +65,19 @@ export const hasFalseValue = (obj: Partial<Record<string, boolean>>) =>
 
 export const hasTrueValue = (obj: Partial<Record<string, boolean>>) =>
   Object.values(obj).some((value) => value === true);
+
+const range = {
+  low: [0, 40],
+  medium: [41, 80],
+  high: [81, 100],
+};
+
+const ranges = Object.entries(range);
+
+export const getLevel = (count: string | number): Level => {
+  return ranges.find((range) => {
+    const min = Number(range[1][0]);
+    const max = Number(range[1][1]);
+    return Number(count) >= min && Number(count) <= max;
+  })?.[0] as Level;
+};

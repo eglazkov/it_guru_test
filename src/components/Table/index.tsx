@@ -21,10 +21,10 @@ import AddRow from "../AddRow";
 export type OnSortCallback<T> = (params: SortState<T>) => void;
 export type OnPaginationCallback = (page: number) => void;
 export type OnAddRowCallback<T> = (row: T) => void;
-export type OnEditRowCallback<T> = (row: T) => Promise<any>;
+export type OnEditRowCallback<T> = (row: T) => Promise<unknown>;
 export type OnRefreshCallback = () => void;
 
-interface TableProps<T extends Record<string, any>> {
+interface TableProps<T> {
   id: string;
   title: string;
   noDataText?: string;
@@ -45,7 +45,7 @@ interface TableProps<T extends Record<string, any>> {
   onRefresh?: OnRefreshCallback;
 }
 
-interface Column<T extends Record<string, any>> {
+interface Column<T> {
   key: keyof T & string;
   title: string;
   minWidth?: number;
@@ -59,6 +59,7 @@ export interface SortState<T> {
   direction: "asc" | "desc" | undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Table = <T extends Record<string, any>>({
   id,
   title,
@@ -126,7 +127,7 @@ const Table = <T extends Record<string, any>>({
   const handleSelectAll = (checked: boolean) => {
     setSelectAll(checked);
     if (checked) {
-      setSelectedRows(new Set(data.map((row) => row.id)));
+      setSelectedRows(new Set(data.map((row) => row.id) as string[]));
     } else {
       setSelectedRows(new Set());
     }
@@ -150,16 +151,18 @@ const Table = <T extends Record<string, any>>({
     ) as SortState<T>;
 
     if (Object.keys(persistedSort).length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSort(persistedSort);
       onSort?.(persistedSort);
     }
-  }, []);
+  }, [id, onSort]);
 
   useEffect(() => {
     const allSelected = selectedRows.size === data.length;
     const someSelected =
       selectedRows.size > 0 && selectedRows.size < data.length;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectAll(allSelected);
     const checkbox = selectAllRef.current as HTMLInputElement;
     if (checkbox) {
@@ -195,7 +198,7 @@ const Table = <T extends Record<string, any>>({
         return 0;
       })
       .slice((currentPage - 1) * rowsCount, currentPage * rowsCount);
-  }, [data, sort, rowsCount, currentPage, showAddRow, columns]);
+  }, [data, sort, rowsCount, currentPage, onSort]);
 
   const handleSort = useCallback(
     (key: keyof T) => {
@@ -234,7 +237,7 @@ const Table = <T extends Record<string, any>>({
         direction,
       });
     },
-    [currentPage, sort],
+    [sort, id, onSort],
   );
 
   const startResize = (key: Key, e: React.MouseEvent<HTMLDivElement>) => {
@@ -405,7 +408,7 @@ const Table = <T extends Record<string, any>>({
             )}
             {(showAddRow ? sortedData.slice(1, rowsCount) : sortedData).map(
               (row) => {
-                const isSelected = isRowSelected(row.id);
+                const isSelected = isRowSelected(row.id as string);
                 return editRowId === row.id ? (
                   <AddRow
                     key={row.id}
@@ -440,7 +443,7 @@ const Table = <T extends Record<string, any>>({
                         type="checkbox"
                         checked={isSelected}
                         onChange={(e) =>
-                          handleRowSelect(row.id, e.target.checked)
+                          handleRowSelect(row.id as string, e.target.checked)
                         }
                         className="w-22 h-22 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                       />
@@ -469,7 +472,7 @@ const Table = <T extends Record<string, any>>({
                         {onEditRow && (
                           <button
                             className="inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center"
-                            onClick={() => editRow(row.id)}
+                            onClick={() => editRow(row.id as number)}
                           >
                             <PlusSingIcon />
                           </button>

@@ -10,9 +10,9 @@ import SettingsIcon from "../../assets/SettingsIcon.svg?react";
 import MessageIcon from "../../assets/MessageIcon.svg?react";
 import NotificationIcon from "../../assets/NotificationIcon.svg?react";
 import LanguageIcon from "../../assets/LanguageIcon.svg?react";
-import { getLevel } from "../../components/LevelBars";
 import type { ProductData } from "../../hooks/useProduct";
 import type { Product } from "../../types/product";
+import { getLevel } from "../../lib/utils";
 
 interface ProductsPageProps {
   data: ProductData<Product>;

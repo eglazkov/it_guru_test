@@ -6,6 +6,7 @@ const useServerProgress = (isLoading: boolean) => {
 
   useEffect(() => {
     if (isLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowProgress(true);
 
       let frame: number;
