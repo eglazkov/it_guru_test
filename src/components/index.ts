@@ -8,3 +8,5 @@ export { default as Pagination } from "./Pagination";
 export { default as Logo } from "./Logo";
 export { default as ProtectedRoute } from "./ProtectedRoute";
 export { default as FormattedAmount } from "./FormattedAmount";
+export { default as AddRow } from "./AddRow";
+export { default as LevelBars } from "./LevelBars";

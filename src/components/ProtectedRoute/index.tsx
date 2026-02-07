@@ -4,14 +4,14 @@ import type { RootState } from "../../store/store";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute: FC = () => {
-  const token = useSelector((state: RootState) => state.auth.token);
+  const user = useSelector((state: RootState) => state.auth.user);
 
-  // Если токена нет, перенаправляем на логин
-  if (!token) {
+  // Если user нет, перенаправляем на логин
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Если токен есть, рендерим вложенные роуты
+  // Если user есть, рендерим вложенные роуты
   return <Outlet />;
 };
 

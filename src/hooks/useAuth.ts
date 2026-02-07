@@ -37,10 +37,11 @@ export const useAuth = (): AuthData => {
 
       toast.success("Добро пожаловать!");
       const storage = isRememberMe ? localStorage : sessionStorage;
-      storage.setItem("token", response.refreshToken);
+      if (response.refreshToken) {
+        storage.setItem("refreshToken", response.refreshToken);
+      }
       navigate("/products");
     } catch (error) {
-      // Ваша обработка ошибок...
       if (isFetchBaseQueryError(error)) {
         toast.error((error.data as { message: string })?.message || "Ошибка");
       } else if (isSerializedError(error)) {

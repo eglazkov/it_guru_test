@@ -1,14 +1,25 @@
 import { useEffect, useRef, useState, type FC } from "react";
 
-import { FormattedAmount, InputSearch, Table } from "../../components";
+import {
+  FormattedAmount,
+  InputSearch,
+  LevelBars,
+  Table,
+} from "../../components";
 import SettingsIcon from "../../assets/SettingsIcon.svg?react";
 import MessageIcon from "../../assets/MessageIcon.svg?react";
 import NotificationIcon from "../../assets/NotificationIcon.svg?react";
 import LanguageIcon from "../../assets/LanguageIcon.svg?react";
 import {
   useLazySearchProductsUniversalQuery,
+  usePostProductMutation,
+  usePutProductMutation,
   type SearchProductsUniversalRequest,
 } from "../../store/api/productApi";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
+import { getLevel } from "../../components/LevelBars";
+import toast from "react-hot-toast";
 
 interface ProductsPageProps {
   data: unknown;
@@ -16,15 +27,20 @@ interface ProductsPageProps {
 
 const ProductsPage: FC<ProductsPageProps> = (props) => {
   const [searchValue, setSearchValue] = useState<string>("");
+  // TODO: держадть параметры в слайсе + persisted/ setings table (width)
   const [filterParams, setFilterParams] =
     useState<SearchProductsUniversalRequest>({
-      limit: "5",
       q: "",
+      limit: "5",
+      skip: "0",
     });
   const [currentPage, setCurrentPage] = useState(1);
   const isFirstRender = useRef(true);
 
-  const [trigger, { data, isFetching }] = useLazySearchProductsUniversalQuery();
+  const [trigger, { isFetching }] = useLazySearchProductsUniversalQuery();
+  const [postProduct] = usePostProductMutation();
+  const [putProduct, { isLoading: isUpdateRow }] = usePutProductMutation();
+  const data = useSelector((state: RootState) => state.product);
 
   useEffect(() => {
     trigger(filterParams);
@@ -35,7 +51,7 @@ const ProductsPage: FC<ProductsPageProps> = (props) => {
       isFirstRender.current = false;
     }
     const handler = setTimeout(() => {
-      if (searchValue || !isFirstRender.current) {
+      if (searchValue) {
         setCurrentPage(1);
         setFilterParams(({ limit }) => ({
           q: searchValue,
@@ -80,15 +96,19 @@ const ProductsPage: FC<ProductsPageProps> = (props) => {
         id="productsTable"
         className="mt-30"
         title="Все позиции"
+        noDataText="Нет данных"
         data={data?.products || []}
-        rowsCount={data?.limit || 5}
+        editableFields={["title", "brand", "sku", "price"]}
+        requiredFields={["title", "brand", "sku", "price"]}
+        rowsCount={filterParams?.limit ? Number(filterParams?.limit) : 5}
         totalCount={data?.total || 0}
         isLoading={isFetching}
-        onSort={({ order, sortBy }) => {
+        isUpdate={isUpdateRow}
+        onSort={({ direction, key }) => {
           setFilterParams((prev) => ({
             ...prev,
-            order,
-            sortBy,
+            order: direction,
+            sortBy: key,
           }));
         }}
         currentPage={currentPage}
@@ -98,6 +118,17 @@ const ProductsPage: FC<ProductsPageProps> = (props) => {
             ...prev,
             skip: String(page > 1 ? (page - 1) * Number(prev.limit) : 0),
           }));
+        }}
+        onAddRow={(row) => {
+          postProduct(row).then(() => {
+            toast.success("Запись успешно добавлена!");
+          });
+        }}
+        onEditRow={(row) => {
+          return putProduct(row);
+        }}
+        onRefresh={() => {
+          trigger(filterParams);
         }}
         columns={[
           {
@@ -129,15 +160,17 @@ const ProductsPage: FC<ProductsPageProps> = (props) => {
             minWidth: 130,
             title: "Вендор",
             key: "brand",
+            align: "center",
             renderCol: (value) => (
               <div className="truncate font-bold">{value}</div>
             ),
           },
-          { minWidth: 130, title: "Артикул", key: "sku" },
+          { minWidth: 130, title: "Артикул", key: "sku", align: "center" },
           {
             minWidth: 130,
             title: "Оценка",
             key: "rating",
+            align: "center",
             renderCol: (value) => (
               <div>
                 <span
@@ -153,9 +186,17 @@ const ProductsPage: FC<ProductsPageProps> = (props) => {
             minWidth: 130,
             title: "Цена, ₽",
             key: "price",
+            align: "center",
             renderCol: (value) => <FormattedAmount amount={value} />,
           },
-          { minWidth: 130, title: "Количество", key: "minimumOrderQuantity" },
+          {
+            minWidth: 130,
+            title: "Количество",
+            key: "minimumOrderQuantity",
+            align: "center",
+            renderCol: (value) =>
+              value ? <LevelBars level={getLevel(value)} /> : value,
+          },
         ]}
       />
     </div>

@@ -1,5 +1,6 @@
-import type { FC } from "react";
+import { useMemo, type FC } from "react";
 import { cn } from "../../lib/utils";
+import LeftIcon from "../../assets/LeftIcon.svg?react";
 
 interface PaginationProps {
   currentPage: number;
@@ -20,7 +21,7 @@ const Pagination: FC<PaginationProps> = ({
   startPage,
   endPage,
 }) => {
-  const getVisiblePages = () => {
+  const visiblePages = useMemo(() => {
     const delta = 2;
     const range = [];
     range.push(1);
@@ -35,9 +36,17 @@ const Pagination: FC<PaginationProps> = ({
     if (totalPages > 1) range.push(totalPages);
 
     return range.filter((page, index, array) => array.indexOf(page) === index);
-  };
+  }, [currentPage, totalPages]);
 
   if (totalPages <= 1) return null;
+
+  const showLeftEllipsis =
+    visiblePages.length > 1 && visiblePages[1] - visiblePages[0] > 1;
+  const showRightEllipsis =
+    visiblePages.length > 1 &&
+    visiblePages[visiblePages.length - 1] -
+      visiblePages[visiblePages.length - 2] >
+      1;
 
   return (
     <div className="flex flex-row justify-between items-center">
@@ -57,11 +66,27 @@ const Pagination: FC<PaginationProps> = ({
               : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
           )}
         >
-          ←
+          <LeftIcon />
         </button>
 
         <div className="flex flex-row gap-8">
-          {getVisiblePages().map((page) => (
+          <button
+            onClick={() => onPageChange(visiblePages[0])}
+            className={cn(
+              "w-30 h-30 text-[14px] rounded-[4px] transition-colors",
+              currentPage === visiblePages[0]
+                ? "bg-[#797FEA] text-white shadow-sm"
+                : "text-[#B2B3B9] border border-[#ECECEB] hover:bg-gray-100 hover:text-gray-900",
+            )}
+          >
+            {visiblePages[0]}
+          </button>
+          {showLeftEllipsis && (
+            <span className="px-2 py-2 text-sm text-gray-500 flex items-center">
+              ...
+            </span>
+          )}
+          {visiblePages.slice(1, -1).map((page) => (
             <button
               key={page}
               onClick={() => onPageChange(page as number)}
@@ -75,6 +100,26 @@ const Pagination: FC<PaginationProps> = ({
               {page}
             </button>
           ))}
+          {showRightEllipsis && (
+            <span className="px-2 py-2 text-sm text-gray-500 flex items-center">
+              ...
+            </span>
+          )}
+          {visiblePages.length > 1 && (
+            <button
+              onClick={() =>
+                onPageChange(visiblePages[visiblePages.length - 1])
+              }
+              className={cn(
+                "w-30 h-30 text-[14px] rounded-[4px] transition-colors",
+                currentPage === visiblePages[visiblePages.length - 1]
+                  ? "bg-[#797FEA] text-white shadow-sm"
+                  : "text-[#B2B3B9] border border-[#ECECEB] hover:bg-gray-100 hover:text-gray-900",
+              )}
+            >
+              {visiblePages[visiblePages.length - 1]}
+            </button>
+          )}
         </div>
         <button
           onClick={() => onPageChange(currentPage + 1)}
@@ -86,7 +131,7 @@ const Pagination: FC<PaginationProps> = ({
               : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
           )}
         >
-          →
+          <LeftIcon className="rotate-180" />
         </button>
       </div>
     </div>

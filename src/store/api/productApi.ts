@@ -10,7 +10,7 @@ import { cleanParams, toSearchParams } from "../../lib/utils";
 
 type ProtuctsRequest = {};
 
-export type ProtuctsResponse = {
+export type ProductsResponse = {
   products: Product[];
   total: number;
   skip: number;
@@ -37,10 +37,10 @@ export const productApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: "https://dummyjson.com",
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.token;
+      const accessToken = (getState() as RootState).auth.accessToken;
 
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+      if (accessToken) {
+        headers.set("Authorization", `Bearer ${accessToken}`);
       }
 
       headers.set("Accept", "application/json");
@@ -49,9 +49,9 @@ export const productApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    getProducts: builder.query<ProtuctsResponse, void>({
+    getProducts: builder.query<ProductsResponse, void>({
       query: () => "/products",
-      transformResponse: (response: ProtuctsResponse) => {
+      transformResponse: (response: ProductsResponse) => {
         if (typeof response === "string") {
           try {
             return JSON.parse(response);
@@ -63,12 +63,12 @@ export const productApi = createApi({
         }
       },
     }),
-    paginateProducts: builder.query<ProtuctsResponse, PaginateProductsRequest>({
+    paginateProducts: builder.query<ProductsResponse, PaginateProductsRequest>({
       query: (params) => ({
         url: "/products",
         params: cleanParams(params),
       }),
-      transformResponse: (response: ProtuctsResponse) => {
+      transformResponse: (response: ProductsResponse) => {
         if (typeof response === "string") {
           try {
             return JSON.parse(response);
@@ -80,12 +80,12 @@ export const productApi = createApi({
         }
       },
     }),
-    searchProducts: builder.query<ProtuctsResponse, SearchProductsRequest>({
+    searchProducts: builder.query<ProductsResponse, SearchProductsRequest>({
       query: (params) => ({
         url: "/products/search",
         params: cleanParams(params),
       }),
-      transformResponse: (response: ProtuctsResponse) => {
+      transformResponse: (response: ProductsResponse) => {
         if (typeof response === "string") {
           try {
             return JSON.parse(response);
@@ -98,7 +98,7 @@ export const productApi = createApi({
       },
     }),
     searchProductsUniversal: builder.query<
-      ProtuctsResponse,
+      ProductsResponse,
       SearchProductsUniversalRequest
     >({
       queryFn: async (params, { signal }, _, baseQuery) => {
@@ -110,17 +110,57 @@ export const productApi = createApi({
           url = `/products?${searchParams}`;
         }
 
-        const response = await baseQuery({
-          url,
-          method: "GET",
-        });
-        if (response.error) {
-          return { error: response.error as FetchBaseQueryError };
+        try {
+          const response = await baseQuery({
+            url,
+            method: "GET",
+          });
+          return {
+            data: response.data as ProductsResponse,
+          };
+        } catch (error) {
+          return { error: error as FetchBaseQueryError };
         }
-
-        return {
-          data: response.data as ProtuctsResponse,
-        };
+      },
+    }),
+    postProduct: builder.mutation<Product, Product>({
+      query: (product) => ({
+        url: "/products/add",
+        method: "POST",
+        body: JSON.stringify(product),
+      }),
+      transformResponse: (response: Product) => {
+        if (typeof response === "string") {
+          try {
+            return JSON.parse(response);
+          } catch (e) {
+            throw new Error(`Failed to parse response: ${e}`);
+          }
+        } else {
+          return response;
+        }
+      },
+    }),
+    putProduct: builder.mutation<Product, Product>({
+      query: (product) => ({
+        url: `/products/${product.id}`,
+        method: "PUT",
+        body: JSON.stringify({
+          ...product,
+          // почему то API принимает на вход id в виде строки, хотя в ответах это число
+          id: String(product.id),
+        }),
+      }),
+      transformResponse: (response: Product) => {
+        if (typeof response === "string") {
+          try {
+            return JSON.parse(response);
+          } catch (e) {
+            throw new Error(`Failed to parse response: ${e}`);
+          }
+        } else {
+          return response;
+        }
       },
     }),
   }),
@@ -131,4 +171,6 @@ export const {
   usePaginateProductsQuery,
   useLazySearchProductsQuery,
   useLazySearchProductsUniversalQuery,
+  usePostProductMutation,
+  usePutProductMutation,
 } = productApi;

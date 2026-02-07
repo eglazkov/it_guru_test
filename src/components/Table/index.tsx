@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -10,18 +11,34 @@ import React, {
 import { cn } from "../../lib/utils";
 import Pagination from "../Pagination";
 import useServerProgress from "../../hooks/useRequestProgress";
+import Button from "../Button";
+import PlusIcon from "../../assets/PlusIcon.svg?react";
+import FiltersIcon from "../../assets/FiltersIcon.svg?react";
+import ArrowsClockwiseIcon from "../../assets/ArrowsClockwiseIcon.svg?react";
+import PlusSingIcon from "../../assets/PlusSingIcon.svg?react";
+import DotsThreeCircleIcon from "../../assets/DotsThreeCircleIcon.svg?react";
+import Input from "../Input";
+import AddRow from "../AddRow";
+
 interface TableProps<T extends Record<string, any>> {
   id: string;
   title: string;
+  noDataText?: string;
   className?: string;
   data: T[];
+  editableFields: (keyof T & string)[];
+  requiredFields: (keyof T & string)[];
   columns: Column<T>[];
   isLoading?: boolean;
+  isUpdate?: boolean;
   rowsCount: number;
   totalCount: number;
   currentPage: number;
-  onSort?: (params: { sortBy: string; order: string }) => void;
+  onSort?: (params: SortState<T>) => void;
   onPagination?: (page: number) => void;
+  onAddRow?: (row: T) => void;
+  onEditRow?: (row: T) => Promise<any>;
+  onRefresh?: () => void;
 }
 
 interface Column<T extends Record<string, any>> {
@@ -30,6 +47,7 @@ interface Column<T extends Record<string, any>> {
   minWidth?: number;
   maxWidth?: number;
   renderCol?: (value: string, row: T) => ReactNode;
+  align?: "center" | "start" | "end";
 }
 
 interface SortState<T> {
@@ -40,15 +58,22 @@ interface SortState<T> {
 const Table = <T extends Record<string, any>>({
   id,
   title,
+  noDataText = "-",
   className,
   columns,
   data,
+  editableFields = [],
+  requiredFields = [],
   isLoading = false,
+  isUpdate = false,
   rowsCount,
   currentPage,
   totalCount,
   onSort,
   onPagination,
+  onAddRow,
+  onEditRow,
+  onRefresh,
 }: TableProps<T>) => {
   type Key = Column<T>["key"];
 
@@ -58,8 +83,9 @@ const Table = <T extends Record<string, any>>({
   });
   const [widths, setWidths] = useState<Record<Key, number>>(() => {
     let initial = {} as Record<Key, number>;
+
     const persistedWidths = JSON.parse(
-      localStorage.getItem(`table-${id}`) || "{}",
+      localStorage.getItem(`table-${id}-widths`) || "{}",
     );
     if (Object.keys(persistedWidths).length > 0) {
       initial = persistedWidths;
@@ -73,6 +99,8 @@ const Table = <T extends Record<string, any>>({
 
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [showAddRow, setShowAddRow] = useState(false);
+  const [editRowId, setEditRowId] = useState<number | undefined>(undefined);
   // const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(totalCount / rowsCount);
   const selectAllRef = useRef<HTMLInputElement>(null);
@@ -113,6 +141,17 @@ const Table = <T extends Record<string, any>>({
   };
 
   useEffect(() => {
+    const persistedSort = JSON.parse(
+      localStorage.getItem(`table-${id}-sort`) || "{}",
+    ) as SortState<T>;
+
+    if (Object.keys(persistedSort).length > 0) {
+      setSort(persistedSort);
+      onSort?.(persistedSort);
+    }
+  }, []);
+
+  useEffect(() => {
     const allSelected = selectedRows.size === data.length;
     const someSelected =
       selectedRows.size > 0 && selectedRows.size < data.length;
@@ -126,9 +165,9 @@ const Table = <T extends Record<string, any>>({
 
   const isRowSelected = (rowId: string) => selectedRows.has(rowId);
 
-  const sortedData = useMemo(() => {
+  const sortedData: T[] = useMemo(() => {
     if (onSort) {
-      return data;
+      return [...data];
     }
     if (!sort.key) {
       const startIndex = (currentPage - 1) * rowsCount;
@@ -152,23 +191,43 @@ const Table = <T extends Record<string, any>>({
         return 0;
       })
       .slice((currentPage - 1) * rowsCount, currentPage * rowsCount);
-  }, [data, sort, rowsCount, currentPage]);
+  }, [data, sort, rowsCount, currentPage, showAddRow, columns]);
 
   const handleSort = useCallback(
     (key: keyof T) => {
-      let direction = "asc";
+      let direction: "asc" | "desc" | undefined = undefined;
+      let orderBy: string = "";
       if (sort.key === key) {
-        direction = sort.direction === "asc" ? "desc" : "asc";
+        direction =
+          sort.direction === "desc"
+            ? undefined
+            : sort.direction === "asc"
+              ? "desc"
+              : "asc";
+        orderBy = direction ? (key as string) : "";
         setSort({
-          key: key as string,
-          direction: sort.direction === "asc" ? "desc" : "asc",
+          key: orderBy,
+          direction,
         });
       } else {
-        setSort({ key: key as string, direction: "asc" });
+        direction = "asc";
+        orderBy = String(key);
+        setSort({ key: orderBy, direction });
+      }
+      if (direction) {
+        localStorage.setItem(
+          `table-${id}-sort`,
+          JSON.stringify({
+            key: orderBy,
+            direction,
+          }),
+        );
+      } else {
+        localStorage.removeItem(`table-${id}-sort`);
       }
       onSort?.({
-        sortBy: String(key),
-        order: direction,
+        key: orderBy,
+        direction,
       });
     },
     [currentPage, sort],
@@ -189,7 +248,7 @@ const Table = <T extends Record<string, any>>({
         const max = col?.maxWidth ?? 600;
         const next = Math.min(max, Math.max(min, startWidth + delta));
         const widths = { ...prev, [key]: next };
-        localStorage.setItem(`table-${id}`, JSON.stringify(widths));
+        localStorage.setItem(`table-${id}-widths`, JSON.stringify(widths));
         return widths;
       });
     };
@@ -203,6 +262,13 @@ const Table = <T extends Record<string, any>>({
     document.addEventListener("mouseup", onUp);
   };
 
+  const addRow = () => {
+    setShowAddRow(true);
+  };
+  const editRow = (id: number) => {
+    setEditRowId(id);
+  };
+
   return (
     <div
       className={cn(
@@ -212,9 +278,33 @@ const Table = <T extends Record<string, any>>({
     >
       <div className="flex flex-row justify-between items-center">
         <h4 className="text-[20px] text-[#202020] font-bold">{title}</h4>
+        {(onRefresh || onAddRow) && (
+          <div className="flex flex-row gap-8">
+            {onRefresh && (
+              <Button
+                className="w-fit py-16 px-20"
+                kind="outlined"
+                onClick={onRefresh}
+              >
+                <ArrowsClockwiseIcon />
+              </Button>
+            )}
+            <Button className="w-fit py-16 px-20" kind="outlined">
+              <FiltersIcon />
+            </Button>
+            {onAddRow && (
+              <Button className="w-fit py-16 px-20" onClick={addRow}>
+                <div className="flex flex-row gap-15 items-center ">
+                  <PlusIcon className="fill-[#FFFFFF]" />
+                  Добавить
+                </div>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
       {showProgress && (
-        <div className="absolute top-80 w-fill pr-30">
+        <div className="absolute top-110 w-fill pr-30">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-medium text-gray-700">
               Загружаем данные...
@@ -231,7 +321,13 @@ const Table = <T extends Record<string, any>>({
           </div>
         </div>
       )}
-      <div className="overflow-x-auto w-full">
+      <div
+        className={cn(
+          "overflow-x-auto w-full",
+          isLoading &&
+            "pointer-events-none opacity-60 pointer-events-none animate-pulse",
+        )}
+      >
         <table id={id} className="table-fixed border-collapse w-fill">
           <thead>
             <tr className="group align-middle text-left">
@@ -254,10 +350,15 @@ const Table = <T extends Record<string, any>>({
                     className="relative py-31 px-[18px] text-left text-[#B2B3B9] text-[16px] font-bold tracking-wider"
                   >
                     <div
-                      className="flex flex-row pr-4 cursor-pointer select-none"
+                      className={cn(
+                        "flex flex-row gap-4 pr-4 cursor-pointer select-none",
+                        column.align === "center" && "justify-center",
+                        column.align === "start" && "justify-start",
+                        column.align === "end" && "justify-end",
+                      )}
                       onClick={() => handleSort(column.key)}
                     >
-                      <div>{column.title}</div>
+                      <div className="text-center">{column.title}</div>
                       <span>
                         {isSorted
                           ? sort.direction === "asc"
@@ -280,47 +381,105 @@ const Table = <T extends Record<string, any>>({
                   </th>
                 );
               })}
+              <th className="w-150"></th>
             </tr>
           </thead>
 
           <tbody className="divide-y-2 divide-[#E2E2E2] [&>tr:first-child]:border-t-1 last:border-b border-[#E2E2E2]">
-            {sortedData.map((row, rowIndex) => {
-              const isSelected = isRowSelected(row.id);
-              return (
-                <tr
-                  key={rowIndex}
-                  className="align-middle hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td
-                    className={cn(
-                      "relative w-40 pl-18",
-                      isSelected &&
-                        "before:content-[''] before:absolute before:inset-y-0 before:left-0 before:w-[6px] before:bg-[#3C538E]",
-                    )}
+            {showAddRow && (
+              <AddRow
+                columns={columns}
+                requiredFields={requiredFields}
+                widths={widths}
+                onCancel={() => {
+                  setShowAddRow(false);
+                }}
+                onAdd={(row) => {
+                  onAddRow?.(row as T);
+                  setShowAddRow(false);
+                }}
+              />
+            )}
+            {(showAddRow ? sortedData.slice(1, rowsCount) : sortedData).map(
+              (row) => {
+                const isSelected = isRowSelected(row.id);
+                return editRowId === row.id ? (
+                  <AddRow
+                    key={row.id}
+                    editRowData={row}
+                    columns={columns}
+                    editableFields={editableFields}
+                    requiredFields={requiredFields}
+                    isLoading={isUpdate}
+                    widths={widths}
+                    onCancel={() => {
+                      setEditRowId(undefined);
+                    }}
+                    onAdd={(row) => {
+                      onEditRow?.(row as T).then(() => {
+                        setEditRowId(undefined);
+                      });
+                    }}
+                  />
+                ) : (
+                  <tr
+                    key={row.id}
+                    className="align-middle hover:bg-gray-50 transition-colors duration-150"
                   >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) =>
-                        handleRowSelect(row.id, e.target.checked)
-                      }
-                      className="w-22 h-22 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                    />
-                  </td>
-                  {columns.map((column) => (
                     <td
-                      style={{ width: widths[column.key] }}
-                      key={column.key}
-                      className="px-18 py-18 text-16 font-medium text-[#000000] truncate"
+                      className={cn(
+                        "relative w-40 pl-18",
+                        isSelected &&
+                          "before:content-[''] before:absolute before:inset-y-0 before:left-0 before:w-[6px] before:bg-[#3C538E]",
+                      )}
                     >
-                      {column.renderCol
-                        ? column.renderCol(String(row[column.key]), row)
-                        : String(row[column.key])}
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) =>
+                          handleRowSelect(row.id, e.target.checked)
+                        }
+                        className="w-22 h-22 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                      />
                     </td>
-                  ))}
-                </tr>
-              );
-            })}
+                    {columns.map((column) => (
+                      <td
+                        style={{ width: widths[column.key] }}
+                        key={column.key}
+                        className={cn(
+                          "px-18 py-18 text-16 font-medium text-[#000000] truncate",
+                          column.align === "center" && "text-center",
+                          column.align === "start" && "text-start",
+                          column.align === "end" && "text-end",
+                        )}
+                      >
+                        {column.renderCol
+                          ? column.renderCol(
+                              String(row[column.key] || noDataText),
+                              row,
+                            )
+                          : String(row[column.key] || noDataText)}
+                      </td>
+                    ))}
+                    <td className="w-150">
+                      <div className="flex flex-row items-center gap-32 mr-8 justify-end">
+                        {onEditRow && (
+                          <button
+                            className="inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center"
+                            onClick={() => editRow(row.id)}
+                          >
+                            <PlusSingIcon />
+                          </button>
+                        )}
+                        <button className="inline-flex items-center justify-center cursor-pointer w-52">
+                          <DotsThreeCircleIcon />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              },
+            )}
           </tbody>
         </table>
       </div>

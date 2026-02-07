@@ -6,6 +6,6 @@ export interface User {
   lastName: string;
   gender: string;
   image: string;
-  accessToken: string;
-  refreshToken: string;
+  accessToken: string | null;
+  refreshToken: string | null;
 }

@@ -4,13 +4,17 @@ import type { User } from "../../types/user";
 
 interface InitialState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
 }
 
 const initialState: InitialState = {
   user: null,
-  token:
-    localStorage.getItem("token") || sessionStorage.getItem("token") || null,
+  accessToken: null,
+  refreshToken:
+    localStorage.getItem("refreshToken") ||
+    sessionStorage.getItem("refreshToken") ||
+    null,
 };
 
 const authSlice = createSlice({
@@ -22,7 +26,25 @@ const authSlice = createSlice({
       userApi.endpoints.authUser.matchFulfilled,
       (state, { payload }) => {
         state.user = payload;
-        state.token = payload.accessToken;
+        state.accessToken = payload.accessToken;
+        state.refreshToken = payload.refreshToken;
+      },
+    );
+    builder.addMatcher(
+      userApi.endpoints.refreshSession.matchFulfilled,
+      (state, { payload }) => {
+        state.accessToken = payload.accessToken;
+        state.refreshToken = payload.refreshToken;
+      },
+    );
+    builder.addMatcher(
+      userApi.endpoints.getUser.matchFulfilled,
+      (state, { payload }) => {
+        state.user = {
+          ...payload,
+          accessToken: state.accessToken,
+          refreshToken: state.refreshToken,
+        };
       },
     );
   },

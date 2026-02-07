@@ -11,8 +11,6 @@ interface CheckBoxProps {
   className?: string;
   checked: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  width?: number;
-  height?: number;
 }
 
 const CheckBox: FC<CheckBoxProps> = ({
@@ -22,8 +20,6 @@ const CheckBox: FC<CheckBoxProps> = ({
   className,
   checked,
   onChange,
-  width = 18,
-  height = 18,
 }) => {
   return (
     <div className={cn("flex flex-row items-center gap-10", className)}>
@@ -37,12 +33,12 @@ const CheckBox: FC<CheckBoxProps> = ({
       />
       <div
         className={`
-        w-${width} h-${height} appearance-none border-2 rounded-[4px] border-[#EDEDED]
+        w-18 h-18 appearance-none border-2 rounded-[4px] border-[#EDEDED]
       `}
       >
         {checked && (
           <svg
-            className={`w-${width} h-${height} text-[#232323]`}
+            className={`w-18 h-18 text-[#232323]`}
             fill="none"
             viewBox="0 0 30 30"
             stroke="currentColor"

@@ -64,3 +64,14 @@ export const debounceFn = <F extends (...args: any[]) => void>(
     timer = setTimeout(() => func(...args), delay);
   };
 };
+
+export const areFieldsNonEmpty = <T extends Partial<Record<string, string>>>(
+  obj: T,
+  keys: (keyof T)[],
+) => keys.every((key) => key in obj && obj[key] != null && obj[key] !== "");
+
+export const hasFalseValue = (obj: Partial<Record<string, boolean>>) =>
+  Object.values(obj).some((value) => value === false);
+
+export const hasTrueValue = (obj: Partial<Record<string, boolean>>) =>
+  Object.values(obj).some((value) => value === true);
