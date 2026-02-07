@@ -1,4 +1,4 @@
-import React, { type FC, type MouseEventHandler, type ReactNode } from "react";
+import { type FC, type MouseEventHandler, type ReactNode } from "react";
 import { cn } from "../../lib/utils";
 
 interface ButtonProps {

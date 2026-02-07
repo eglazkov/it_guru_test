@@ -1,4 +1,4 @@
-import React, { type FC } from "react";
+import { type FC } from "react";
 import LogoIcon from "../../assets/Logo.svg?react";
 
 const Logo: FC = () => {
