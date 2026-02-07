@@ -334,163 +334,169 @@ const Table = <T extends Record<string, any>>({
           isLoading && "opacity-60 pointer-events-none animate-pulse",
         )}
       >
-        <table id={id} className="table-fixed border-collapse w-fill">
-          <thead>
-            <tr className="group align-middle text-left">
-              <th className="w-40 pl-18">
-                <input
-                  ref={selectAllRef}
-                  type="checkbox"
-                  checked={selectAll}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="w-22 h-22 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                />
-              </th>
-              {columns.map((column, columnIndex) => {
-                const isSorted = sort.key === column.key;
-                const isLastColumn = columnIndex === columns.length - 1;
-                return (
-                  <th
-                    key={column.key}
-                    style={{ width: widths[column.key] }}
-                    className="relative py-31 px-[18px] text-left text-[#B2B3B9] text-[16px] font-bold tracking-wider"
-                  >
-                    <div
-                      className={cn(
-                        "flex flex-row gap-4 pr-4 cursor-pointer select-none",
-                        column.align === "center" && "justify-center",
-                        column.align === "start" && "justify-start",
-                        column.align === "end" && "justify-end",
-                      )}
-                      onClick={() => handleSort(column.key)}
-                    >
-                      <div className="text-center">{column.title}</div>
-                      <span>
-                        {isSorted
-                          ? sort.direction === "asc"
-                            ? "↑"
-                            : "↓"
-                          : "↕"}
-                      </span>
-                    </div>
-                    {!isLastColumn && (
-                      <div
-                        onMouseDown={(e) => {
-                          startResize(column.key, e);
-                        }}
-                        className="absolute top-[40%] right-0 w-4 h-1/4 cursor-col-resize
-                    opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10"
-                      >
-                        <div className="w-1 mx-auto h-full bg-[#B2B3B9]"></div>
-                      </div>
-                    )}
-                  </th>
-                );
-              })}
-              <th className="w-150"></th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y-2 divide-[#E2E2E2] [&>tr:first-child]:border-t-1 last:border-b border-[#E2E2E2]">
-            {showAddRow && (
-              <AddRow
-                columns={columns}
-                requiredFields={requiredFields}
-                widths={widths}
-                onCancel={() => {
-                  setShowAddRow(false);
-                }}
-                onAdd={(row) => {
-                  onAddRow?.(row as T);
-                  setShowAddRow(false);
-                }}
-              />
-            )}
-            {(showAddRow ? sortedData.slice(1, rowsCount) : sortedData).map(
-              (row) => {
-                const isSelected = isRowSelected(row.id as string);
-                return editRowId === row.id ? (
-                  <AddRow
-                    key={row.id}
-                    editRowData={row}
-                    columns={columns}
-                    editableFields={editableFields}
-                    requiredFields={requiredFields}
-                    isLoading={isUpdate}
-                    widths={widths}
-                    onCancel={() => {
-                      setEditRowId(undefined);
-                    }}
-                    onAdd={(row) => {
-                      onEditRow?.(row as T).then(() => {
-                        setEditRowId(undefined);
-                      });
-                    }}
+        {!sortedData?.length ? (
+          <div className="grid place-items-center my-40 mx-auto text-[20px] font-bold">
+            {noDataText}
+          </div>
+        ) : (
+          <table id={id} className="table-fixed border-collapse w-fill">
+            <thead>
+              <tr className="group align-middle text-left">
+                <th className="w-40 pl-18">
+                  <input
+                    ref={selectAllRef}
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="w-22 h-22 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                   />
-                ) : (
-                  <tr
-                    key={row.id}
-                    className="align-middle hover:bg-gray-50 transition-colors duration-150"
-                  >
-                    <td
-                      className={cn(
-                        "relative w-40 pl-18",
-                        isSelected &&
-                          "before:content-[''] before:absolute before:inset-y-0 before:left-0 before:w-[6px] before:bg-[#3C538E]",
-                      )}
+                </th>
+                {columns.map((column, columnIndex) => {
+                  const isSorted = sort.key === column.key;
+                  const isLastColumn = columnIndex === columns.length - 1;
+                  return (
+                    <th
+                      key={column.key}
+                      style={{ width: widths[column.key] }}
+                      className="relative py-31 px-[18px] text-left text-[#B2B3B9] text-[16px] font-bold tracking-wider"
                     >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={(e) =>
-                          handleRowSelect(row.id as string, e.target.checked)
-                        }
-                        className="w-22 h-22 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                      />
-                    </td>
-                    {columns.map((column) => (
-                      <td
-                        style={{ width: widths[column.key] }}
-                        key={column.key}
+                      <div
                         className={cn(
-                          "px-18 py-18 text-16 font-medium text-[#000000] truncate",
-                          column.align === "center" && "text-center",
-                          column.align === "start" && "text-start",
-                          column.align === "end" && "text-end",
+                          "flex flex-row gap-4 pr-4 cursor-pointer select-none",
+                          column.align === "center" && "justify-center",
+                          column.align === "start" && "justify-start",
+                          column.align === "end" && "justify-end",
+                        )}
+                        onClick={() => handleSort(column.key)}
+                      >
+                        <div className="text-center">{column.title}</div>
+                        <span>
+                          {isSorted
+                            ? sort.direction === "asc"
+                              ? "↑"
+                              : "↓"
+                            : "↕"}
+                        </span>
+                      </div>
+                      {!isLastColumn && (
+                        <div
+                          onMouseDown={(e) => {
+                            startResize(column.key, e);
+                          }}
+                          className="absolute top-[40%] right-0 w-4 h-1/4 cursor-col-resize
+                    opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10"
+                        >
+                          <div className="w-1 mx-auto h-full bg-[#B2B3B9]"></div>
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
+                <th className="w-150"></th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y-2 divide-[#E2E2E2] [&>tr:first-child]:border-t-1 last:border-b border-[#E2E2E2]">
+              {showAddRow && (
+                <AddRow
+                  columns={columns}
+                  requiredFields={requiredFields}
+                  widths={widths}
+                  onCancel={() => {
+                    setShowAddRow(false);
+                  }}
+                  onAdd={(row) => {
+                    onAddRow?.(row as T);
+                    setShowAddRow(false);
+                  }}
+                />
+              )}
+              {(showAddRow ? sortedData.slice(1, rowsCount) : sortedData).map(
+                (row) => {
+                  const isSelected = isRowSelected(row.id as string);
+                  return editRowId === row.id ? (
+                    <AddRow
+                      key={row.id}
+                      editRowData={row}
+                      columns={columns}
+                      editableFields={editableFields}
+                      requiredFields={requiredFields}
+                      isLoading={isUpdate}
+                      widths={widths}
+                      onCancel={() => {
+                        setEditRowId(undefined);
+                      }}
+                      onAdd={(row) => {
+                        onEditRow?.(row as T).then(() => {
+                          setEditRowId(undefined);
+                        });
+                      }}
+                    />
+                  ) : (
+                    <tr
+                      key={row.id}
+                      className="align-middle hover:bg-gray-50 transition-colors duration-150"
+                    >
+                      <td
+                        className={cn(
+                          "relative w-40 pl-18",
+                          isSelected &&
+                            "before:content-[''] before:absolute before:inset-y-0 before:left-0 before:w-[6px] before:bg-[#3C538E]",
                         )}
                       >
-                        {column.renderCol
-                          ? column.renderCol(
-                              String(row[column.key] || noDataText),
-                              row,
-                            )
-                          : String(row[column.key] || noDataText)}
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) =>
+                            handleRowSelect(row.id as string, e.target.checked)
+                          }
+                          className="w-22 h-22 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        />
                       </td>
-                    ))}
-                    <td className="w-150">
-                      <div className="flex flex-row items-center gap-32 mr-8 justify-end">
-                        {onEditRow && (
-                          <button
-                            className={cn(
-                              "inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center",
-                              "hover:bg-[#1E26C2] active:bg-[#191FB0] focus:ring-2 focus:ring-[#242EDB]/50 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl",
-                            )}
-                            onClick={() => editRow(row.id as number)}
-                          >
-                            <PlusSingIcon />
+                      {columns.map((column) => (
+                        <td
+                          style={{ width: widths[column.key] }}
+                          key={column.key}
+                          className={cn(
+                            "px-18 py-18 text-16 font-medium text-[#000000] truncate",
+                            column.align === "center" && "text-center",
+                            column.align === "start" && "text-start",
+                            column.align === "end" && "text-end",
+                          )}
+                        >
+                          {column.renderCol
+                            ? column.renderCol(
+                                String(row[column.key] || noDataText),
+                                row,
+                              )
+                            : String(row[column.key] || noDataText)}
+                        </td>
+                      ))}
+                      <td className="w-150">
+                        <div className="flex flex-row items-center gap-32 mr-8 justify-end">
+                          {onEditRow && (
+                            <button
+                              className={cn(
+                                "inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center",
+                                "hover:bg-[#1E26C2] active:bg-[#191FB0] focus:ring-2 focus:ring-[#242EDB]/50 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl",
+                              )}
+                              onClick={() => editRow(row.id as number)}
+                            >
+                              <PlusSingIcon />
+                            </button>
+                          )}
+                          <button className="inline-flex items-center justify-center cursor-pointer w-52">
+                            <DotsThreeCircleIcon />
                           </button>
-                        )}
-                        <button className="inline-flex items-center justify-center cursor-pointer w-52">
-                          <DotsThreeCircleIcon />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              },
-            )}
-          </tbody>
-        </table>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                },
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
       <Pagination
         currentPage={currentPage}
