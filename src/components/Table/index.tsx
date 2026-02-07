@@ -317,7 +317,7 @@ const Table = <T extends Record<string, any>>({
         )}
       </div>
       {showProgress && (
-        <div className="absolute top-110 mob:top-96 w-fill pr-30 mob:pr-0">
+        <div className="absolute top-110 mob:top-116 w-fill pr-30 mob:pr-10">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[18px] mob:text[16px] font-medium text-gray-700">
               Загружаем данные...
