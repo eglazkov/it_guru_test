@@ -1,6 +1,7 @@
 import { type FC } from "react";
 
 import {
+  CarouselImage,
   FormattedAmount,
   InputSearch,
   LevelBars,
@@ -76,16 +77,7 @@ const ProductsPage: FC<ProductsPageProps> = ({ data }) => {
             key: "title",
             renderCol: (value, row) => (
               <div className="flex items-center gap-10 min-w-0">
-                <div className="w-48 h-48 bg-[#C4C4C4] rounded-[8px] flex-none">
-                  <img
-                    src={row.thumbnail}
-                    alt="Фото"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                </div>
+                <CarouselImage images={row.images} preview={row.thumbnail} />
                 <div className="flex flex-col gap-10 min-w-0 flex-1">
                   <div className="truncate min-w-0">{value}</div>
                   <div className="text-[#B2B3B9] truncate min-w-0">

@@ -11,3 +11,4 @@ export { default as FormattedAmount } from "./FormattedAmount";
 export { default as AddRow } from "./AddRow";
 export { default as LevelBars } from "./LevelBars";
 export { default as Spinner } from "./Spinner";
+export { default as CarouselImage } from "./CarouselImage";
