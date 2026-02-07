@@ -155,7 +155,7 @@ const Table = <T extends Record<string, any>>({
       setSort(persistedSort);
       onSort?.(persistedSort);
     }
-  }, [id, onSort]);
+  }, [id]);
 
   useEffect(() => {
     const allSelected = selectedRows.size === data.length;
@@ -198,7 +198,7 @@ const Table = <T extends Record<string, any>>({
         return 0;
       })
       .slice((currentPage - 1) * rowsCount, currentPage * rowsCount);
-  }, [data, sort, rowsCount, currentPage, onSort]);
+  }, [data, sort, rowsCount, currentPage, showAddRow, columns]);
 
   const handleSort = useCallback(
     (key: keyof T) => {
@@ -237,7 +237,7 @@ const Table = <T extends Record<string, any>>({
         direction,
       });
     },
-    [sort, id, onSort],
+    [sort, id],
   );
 
   const startResize = (key: Key, e: React.MouseEvent<HTMLDivElement>) => {

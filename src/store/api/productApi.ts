@@ -32,7 +32,7 @@ export type SearchProductsUniversalRequest = PaginateProductsRequest &
 export const productApi = createApi({
   reducerPath: "protuctApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://dummyjson.com",
+    baseUrl: import.meta.env.VITE_API_URL,
     prepareHeaders: (headers, { getState }) => {
       const accessToken = (getState() as RootState).auth.accessToken;
 

@@ -66,7 +66,7 @@ export const useProduct = (): ProductData<Product> => {
       isFirstRender.current = false;
     }
     const handler = setTimeout(() => {
-      if (searchValue) {
+      if (searchValue || !isFirstRender.current) {
         setCurrentPage(1);
         setFilterParams(({ limit }) => ({
           q: searchValue,

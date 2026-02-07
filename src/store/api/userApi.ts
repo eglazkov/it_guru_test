@@ -26,7 +26,7 @@ type RefreshResponse = {
 };
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "https://dummyjson.com",
+  baseUrl: import.meta.env.VITE_API_URL,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
