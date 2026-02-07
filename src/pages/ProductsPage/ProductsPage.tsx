@@ -20,18 +20,20 @@ interface ProductsPageProps {
 
 const ProductsPage: FC<ProductsPageProps> = ({ data }) => {
   return (
-    <div className="mt-20 mb-20 mr-30">
+    <div className="mt-20 mb-20 mr-30 mob:mr-0">
       <div className="bg-[#FFFFFF] px-25 py-30 rounded-[10px]">
-        <div className="flex flex-row  h-full justify-between items-center">
-          <h3 className="text-[24px] text=[#202020] font-bold">Товары</h3>
+        <div className="flex flex-row mob:flex-col h-full justify-between items-center mob:items-start">
+          <h3 className="text-[24px] text=[#202020] font-bold mob:text-start mob:relative">
+            Товары
+          </h3>
           <InputSearch
-            className="w-1/2"
+            className="w-1/2 mob:w-full mob:mt-20"
             placeholder="Найти"
             value={data.searchValue}
             onChange={(e) => data.onSearchValueChange(e.target.value)}
           />
-          <div className="w-1 h-56 rounded-[8px] bg-[#C2C2C2]/50"></div>
-          <div className="flex flex-row gap-30 items-center">
+          <div className="w-1 h-56 rounded-[8px] bg-[#C2C2C2]/50 mob:sr-only"></div>
+          <div className="flex flex-row gap-30 items-center mob:self-end mob:absolute mob:mt-4">
             <LanguageIcon className="cursor-pointer w-28 h-28" />
             <div className="relative w-28 h-28">
               <NotificationIcon className="cursor-pointer" />

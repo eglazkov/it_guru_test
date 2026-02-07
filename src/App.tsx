@@ -27,7 +27,7 @@ function App() {
       {user && (
         <Button
           onClick={() => dispatch(logOut())}
-          className="w-40 hover:w-100 fixed opacity-30 hover:opacity-90 top-10 p-5 right-10 z-10 truncate"
+          className="w-40 mob:w-fit hover:w-100 fixed opacity-30 hover:opacity-90 top-10 p-5 right-10 z-10 truncate"
           type="submit"
         >
           <span>Выйти</span>

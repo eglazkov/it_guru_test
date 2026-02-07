@@ -49,8 +49,8 @@ const Pagination: FC<PaginationProps> = ({
       1;
 
   return (
-    <div className="flex flex-row justify-between items-center">
-      <div className="text-[18px] text-[#969B9F]">
+    <div className="flex flex-row justify-between items-center mob:flex-col">
+      <div className="text-[18px] text-[#969B9F] mob">
         Показано{" "}
         <span className="text-[#333333]">{`${startPage}-${endPage}`}</span> из{" "}
         <span className="text-[#333333]">{totalCount}</span>
@@ -69,7 +69,7 @@ const Pagination: FC<PaginationProps> = ({
           <LeftIcon />
         </button>
 
-        <div className="flex flex-row gap-8">
+        <div className="flex flex-row gap-8 mob:mt-20">
           <button
             onClick={() => onPageChange(visiblePages[0])}
             className={cn(

@@ -24,6 +24,8 @@
   }
 }
 
+@custom-variant mob (@media (max-width: 768px));
+
 :root {
   font-family: var(--font-inter);
   line-height: 1.5;

@@ -5,7 +5,7 @@ const NotFoundPage = () => {
     <div className="grid place-items-center h-screen">
       <div className="text-center text-[20px] font-bold">
         <div>Ошибка 404</div>
-        <div className="font-normal">
+        <div className="font-normal mob:text-[18px]">
           <span className="mr-10 text-[#B2B3B9]">
             Такой страницы не существует!
           </span>

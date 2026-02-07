@@ -279,28 +279,34 @@ const Table = <T extends Record<string, any>>({
   return (
     <div
       className={cn(
-        "bg-[#FFFFFF] rounded-[12px] p-30 flex flex-col gap-40 relative",
+        "bg-[#FFFFFF] rounded-[12px] p-30 flex flex-col gap-40 mob:gap-20 relative",
         className,
       )}
     >
-      <div className="flex flex-row justify-between items-center">
+      <div className="flex flex-row justify-between items-center mob:flex-col mob:items-start">
         <h4 className="text-[20px] text-[#202020] font-bold">{title}</h4>
         {(onRefresh || onAddRow) && (
-          <div className="flex flex-row gap-8">
+          <div className="flex flex-row gap-8 mob:self-end mob:mt-10">
             {onRefresh && (
               <Button
-                className="w-fit py-16 px-20"
+                className="w-fit py-16 px-20 mob:px-10 mob:py-8"
                 kind="outlined"
                 onClick={onRefresh}
               >
                 <ArrowsClockwiseIcon />
               </Button>
             )}
-            <Button className="w-fit py-16 px-20" kind="outlined">
+            <Button
+              className="w-fit py-16 px-20 mob:px-10 mob:py-8"
+              kind="outlined"
+            >
               <FiltersIcon />
             </Button>
             {onAddRow && (
-              <Button className="w-fit py-16 px-20" onClick={addRow}>
+              <Button
+                className="w-fit py-16 px-20 mob:px-10 mob:py-8"
+                onClick={addRow}
+              >
                 <div className="flex flex-row gap-15 items-center">
                   <PlusIcon className="fill-[#FFFFFF]" />
                   Добавить
@@ -311,9 +317,9 @@ const Table = <T extends Record<string, any>>({
         )}
       </div>
       {showProgress && (
-        <div className="absolute top-110 w-fill pr-30">
+        <div className="absolute top-110 mob:top-120 w-fill pr-30">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[18px] font-medium text-gray-700">
+            <span className="text-[18px] mob:text[16px] font-medium text-gray-700">
               Загружаем данные...
             </span>
             <span className="text-sm font-medium text-gray-900">
@@ -384,7 +390,7 @@ const Table = <T extends Record<string, any>>({
                             startResize(column.key, e);
                           }}
                           className="absolute top-[40%] right-0 w-4 h-1/4 cursor-col-resize
-                    opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10"
+                    opacity-0 invisible group-hover:opacity-100 group-hover:visible mob:opacity-0 transition-all duration-200 z-10"
                         >
                           <div className="w-1 mx-auto h-full bg-[#B2B3B9]"></div>
                         </div>
