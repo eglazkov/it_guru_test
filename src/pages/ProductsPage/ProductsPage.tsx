@@ -22,7 +22,7 @@ interface ProductsPageProps {
 const ProductsPage: FC<ProductsPageProps> = ({ data }) => {
   return (
     <div className="mt-20 mb-20 mr-30 mob:mr-0">
-      <div className="bg-[#FFFFFF] px-25 py-30 rounded-[10px]">
+      <div className="bg-[#FFFFFF] px-25 mob:px-16 py-30 rounded-[10px]">
         <div className="flex flex-row mob:flex-col h-full justify-between items-center mob:items-start">
           <h3 className="text-[24px] text=[#202020] font-bold mob:text-start mob:relative">
             Товары

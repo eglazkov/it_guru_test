@@ -279,7 +279,7 @@ const Table = <T extends Record<string, any>>({
   return (
     <div
       className={cn(
-        "bg-[#FFFFFF] rounded-[12px] p-30 flex flex-col gap-40 mob:gap-20 relative",
+        "bg-[#FFFFFF] rounded-[12px] p-30 mob:px-16 flex flex-col gap-40 mob:gap-20 relative",
         className,
       )}
     >
@@ -317,7 +317,7 @@ const Table = <T extends Record<string, any>>({
         )}
       </div>
       {showProgress && (
-        <div className="absolute top-110 mob:top-120 w-fill pr-30">
+        <div className="absolute top-110 mob:top-96 w-fill pr-30 mob:pr-0">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[18px] mob:text[16px] font-medium text-gray-700">
               Загружаем данные...
