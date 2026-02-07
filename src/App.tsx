@@ -4,13 +4,7 @@ import {
   ProductsPageContainer,
   NotFoundPage,
 } from "./pages";
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-  useNavigate,
-} from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { ProtectedRoute } from "./components";
 import { useLazyGetUserQuery } from "./store/api/userApi";
 import { useEffect } from "react";
@@ -31,7 +25,9 @@ function App() {
     <>
       <Toaster position="top-right" />
       {isLoading && !data ? (
-        <div>Загрузка...</div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="w-80 h-80 border-4 border-[#242EDB]/20 border-t-[#242EDB] rounded-full animate-spin"></div>
+        </div>
       ) : (
         <Routes>
           <Route path="/login" element={<AuthPageContainer />} />

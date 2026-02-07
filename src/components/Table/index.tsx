@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -17,8 +16,13 @@ import FiltersIcon from "../../assets/FiltersIcon.svg?react";
 import ArrowsClockwiseIcon from "../../assets/ArrowsClockwiseIcon.svg?react";
 import PlusSingIcon from "../../assets/PlusSingIcon.svg?react";
 import DotsThreeCircleIcon from "../../assets/DotsThreeCircleIcon.svg?react";
-import Input from "../Input";
 import AddRow from "../AddRow";
+
+export type OnSortCallback<T> = (params: SortState<T>) => void;
+export type OnPaginationCallback = (page: number) => void;
+export type OnAddRowCallback<T> = (row: T) => void;
+export type OnEditRowCallback<T> = (row: T) => Promise<any>;
+export type OnRefreshCallback = () => void;
 
 interface TableProps<T extends Record<string, any>> {
   id: string;
@@ -34,11 +38,11 @@ interface TableProps<T extends Record<string, any>> {
   rowsCount: number;
   totalCount: number;
   currentPage: number;
-  onSort?: (params: SortState<T>) => void;
-  onPagination?: (page: number) => void;
-  onAddRow?: (row: T) => void;
-  onEditRow?: (row: T) => Promise<any>;
-  onRefresh?: () => void;
+  onSort?: OnSortCallback<T>;
+  onPagination?: OnPaginationCallback;
+  onAddRow?: OnAddRowCallback<T>;
+  onEditRow?: OnEditRowCallback<T>;
+  onRefresh?: OnRefreshCallback;
 }
 
 interface Column<T extends Record<string, any>> {
@@ -50,7 +54,7 @@ interface Column<T extends Record<string, any>> {
   align?: "center" | "start" | "end";
 }
 
-interface SortState<T> {
+export interface SortState<T> {
   key: keyof T;
   direction: "asc" | "desc" | undefined;
 }
@@ -306,7 +310,7 @@ const Table = <T extends Record<string, any>>({
       {showProgress && (
         <div className="absolute top-110 w-fill pr-30">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-[18px] font-medium text-gray-700">
               Загружаем данные...
             </span>
             <span className="text-sm font-medium text-gray-900">
@@ -324,8 +328,7 @@ const Table = <T extends Record<string, any>>({
       <div
         className={cn(
           "overflow-x-auto w-full",
-          isLoading &&
-            "pointer-events-none opacity-60 pointer-events-none animate-pulse",
+          isLoading && "opacity-60 pointer-events-none animate-pulse",
         )}
       >
         <table id={id} className="table-fixed border-collapse w-fill">

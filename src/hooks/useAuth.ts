@@ -15,7 +15,6 @@ export interface AuthData {
   onSubmit: (rememberme: boolean) => void;
 }
 
-// TODO: прикрутить логику с refreshToken
 export const useAuth = (): AuthData => {
   const navigate = useNavigate();
   const [authUser] = useAuthUserMutation();

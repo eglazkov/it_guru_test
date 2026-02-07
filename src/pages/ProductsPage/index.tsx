@@ -1,10 +1,10 @@
-import { useAuth } from "../../hooks/useAuth";
+import { useProduct } from "../../hooks/useProduct";
 import ProductsPage from "./ProductsPage";
 
 const ProductsPageContainer = () => {
-  // const authData = useAuth();
+  const productData = useProduct();
 
-  return <ProductsPage data={undefined} />;
+  return <ProductsPage data={productData} />;
 };
 
 export default ProductsPageContainer;

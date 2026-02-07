@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FC } from "react";
+import { type FC } from "react";
 
 import {
   FormattedAmount,
@@ -10,60 +10,15 @@ import SettingsIcon from "../../assets/SettingsIcon.svg?react";
 import MessageIcon from "../../assets/MessageIcon.svg?react";
 import NotificationIcon from "../../assets/NotificationIcon.svg?react";
 import LanguageIcon from "../../assets/LanguageIcon.svg?react";
-import {
-  useLazySearchProductsUniversalQuery,
-  usePostProductMutation,
-  usePutProductMutation,
-  type SearchProductsUniversalRequest,
-} from "../../store/api/productApi";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../store/store";
 import { getLevel } from "../../components/LevelBars";
-import toast from "react-hot-toast";
+import type { ProductData } from "../../hooks/useProduct";
+import type { Product } from "../../types/product";
 
 interface ProductsPageProps {
-  data: unknown;
+  data: ProductData<Product>;
 }
 
-const ProductsPage: FC<ProductsPageProps> = (props) => {
-  const [searchValue, setSearchValue] = useState<string>("");
-  // TODO: держадть параметры в слайсе + persisted/ setings table (width)
-  const [filterParams, setFilterParams] =
-    useState<SearchProductsUniversalRequest>({
-      q: "",
-      limit: "5",
-      skip: "0",
-    });
-  const [currentPage, setCurrentPage] = useState(1);
-  const isFirstRender = useRef(true);
-
-  const [trigger, { isFetching }] = useLazySearchProductsUniversalQuery();
-  const [postProduct] = usePostProductMutation();
-  const [putProduct, { isLoading: isUpdateRow }] = usePutProductMutation();
-  const data = useSelector((state: RootState) => state.product);
-
-  useEffect(() => {
-    trigger(filterParams);
-  }, [filterParams]);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-    }
-    const handler = setTimeout(() => {
-      if (searchValue) {
-        setCurrentPage(1);
-        setFilterParams(({ limit }) => ({
-          q: searchValue,
-          limit,
-          skip: "0",
-        }));
-      }
-    }, 400);
-
-    return () => clearTimeout(handler);
-  }, [searchValue]);
-
+const ProductsPage: FC<ProductsPageProps> = ({ data }) => {
   return (
     <div className="mt-20 mb-20 mr-30">
       <div className="bg-[#FFFFFF] px-25 py-30 rounded-[10px]">
@@ -72,8 +27,8 @@ const ProductsPage: FC<ProductsPageProps> = (props) => {
           <InputSearch
             className="w-1/2"
             placeholder="Найти"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            value={data.searchValue}
+            onChange={(e) => data.onSearchValueChange(e.target.value)}
           />
           <div className="w-1 h-56 rounded-[8px] bg-[#C2C2C2]/50"></div>
           <div className="flex flex-row gap-30 items-center">
@@ -100,36 +55,18 @@ const ProductsPage: FC<ProductsPageProps> = (props) => {
         data={data?.products || []}
         editableFields={["title", "brand", "sku", "price"]}
         requiredFields={["title", "brand", "sku", "price"]}
-        rowsCount={filterParams?.limit ? Number(filterParams?.limit) : 5}
+        rowsCount={
+          data.filterParams?.limit ? Number(data.filterParams?.limit) : 5
+        }
         totalCount={data?.total || 0}
-        isLoading={isFetching}
-        isUpdate={isUpdateRow}
-        onSort={({ direction, key }) => {
-          setFilterParams((prev) => ({
-            ...prev,
-            order: direction,
-            sortBy: key,
-          }));
-        }}
-        currentPage={currentPage}
-        onPagination={(page) => {
-          setCurrentPage(page);
-          setFilterParams((prev) => ({
-            ...prev,
-            skip: String(page > 1 ? (page - 1) * Number(prev.limit) : 0),
-          }));
-        }}
-        onAddRow={(row) => {
-          postProduct(row).then(() => {
-            toast.success("Запись успешно добавлена!");
-          });
-        }}
-        onEditRow={(row) => {
-          return putProduct(row);
-        }}
-        onRefresh={() => {
-          trigger(filterParams);
-        }}
+        isLoading={data.isFetching}
+        isUpdate={data.isUpdateRow}
+        onSort={data.onSort}
+        currentPage={data.currentPage}
+        onPagination={data.onPagination}
+        onAddRow={data.onAddRow}
+        onEditRow={data.onEditRow}
+        onRefresh={data.onRefresh}
         columns={[
           {
             minWidth: 200,
