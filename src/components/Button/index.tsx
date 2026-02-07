@@ -6,6 +6,7 @@ interface ButtonProps {
   type?: "submit" | "reset" | "button" | undefined;
   className?: string;
   kind?: "default" | "outlined";
+  disabled?: boolean;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
@@ -14,12 +15,14 @@ const Button: FC<ButtonProps> = ({
   type,
   className,
   kind = "default",
+  disabled = false,
   onClick,
 }) => {
   return (
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={cn(
         "bg-[#242EDB] w-full py-16 text-[18px] text-[#FFFFFF] cursor-pointer font-semibold",
         "rounded-[12px] bg-linear-to-b from-[#FFFFFF]/0 from-0% to-[#FFFFFF]/12 to-100%",

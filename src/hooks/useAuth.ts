@@ -9,6 +9,7 @@ export interface AuthData {
   email: string;
   password: string;
   isRememberMe: boolean;
+  isLoading: boolean;
   onEmailChange: (email: string) => void;
   onPasswordChange: (password: string) => void;
   onRemindChange: (isRemind: boolean) => void;
@@ -17,7 +18,7 @@ export interface AuthData {
 
 export const useAuth = (): AuthData => {
   const navigate = useNavigate();
-  const [authUser] = useAuthUserMutation();
+  const [authUser, { isLoading }] = useAuthUserMutation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,6 +56,7 @@ export const useAuth = (): AuthData => {
     email,
     password,
     isRememberMe,
+    isLoading,
     onEmailChange: setEmail,
     onPasswordChange: setPassword,
     onRemindChange: setIsRememberMe,

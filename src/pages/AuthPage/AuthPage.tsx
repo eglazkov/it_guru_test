@@ -1,6 +1,6 @@
 import { type FC } from "react";
 
-import { Input, CheckBox, Button, Logo } from "../../components";
+import { Input, CheckBox, Button, Logo, Spinner } from "../../components";
 import type { AuthData } from "../../hooks/useAuth";
 
 interface AuthPageProps {
@@ -43,6 +43,7 @@ const AuthPage: FC<AuthPageProps> = ({ data }) => {
                 value={data.email}
                 onChange={(e) => data.onEmailChange(e.target.value)}
                 clearable
+                disabled={data.isLoading}
               />
               <Input
                 className="mb-20"
@@ -53,6 +54,7 @@ const AuthPage: FC<AuthPageProps> = ({ data }) => {
                 type="password"
                 value={data.password}
                 onChange={(e) => data.onPasswordChange(e.target.value)}
+                disabled={data.isLoading}
               />
               <CheckBox
                 className="mb-20"
@@ -61,8 +63,16 @@ const AuthPage: FC<AuthPageProps> = ({ data }) => {
                 name="rememberMe"
                 checked={data.isRememberMe}
                 onChange={(e) => data.onRemindChange(e.target.checked)}
+                disabled={data.isLoading}
               />
-              <Button type="submit">Войти</Button>
+              <Button
+                className="flex flex-row items-center justify-center gap-20"
+                type="submit"
+                disabled={data.isLoading}
+              >
+                {data.isLoading && <Spinner kind="secondary" size="small" />}
+                <span>Войти</span>
+              </Button>
             </div>
           </form>
           <div className="flex w-full flex-row items-center gap-10 mb-32">

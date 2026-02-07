@@ -4,42 +4,58 @@ import {
   ProductsPageContainer,
   NotFoundPage,
 } from "./pages";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
-import { ProtectedRoute } from "./components";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { Button, ProtectedRoute, Spinner } from "./components";
 import { useLazyGetUserQuery } from "./store/api/userApi";
 import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "./store/store";
+import { logOut } from "./store/slices/user";
 
 function App() {
-  const navigate = useNavigate();
-  const [getUser, { data, isLoading }] = useLazyGetUserQuery();
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const [getUser, { isLoading }] = useLazyGetUserQuery();
 
   useEffect(() => {
-    getUser();
+    !user && getUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !data) {
-      navigate("/login");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, data]);
-
   return (
     <>
+      {user && (
+        <Button
+          onClick={() => dispatch(logOut())}
+          className="w-40 hover:w-100 fixed opacity-30 hover:opacity-90 top-10 p-5 right-10 z-10 truncate"
+          type="submit"
+        >
+          <span>Выйти</span>
+        </Button>
+      )}
       <Toaster position="top-right" />
-      {isLoading && !data ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="w-80 h-80 border-4 border-[#242EDB]/20 border-t-[#242EDB] rounded-full animate-spin"></div>
-        </div>
+      {isLoading && !user ? (
+        <Spinner
+          size="large"
+          className="fixed inset-0 z-50 flex items-center justify-center"
+        />
       ) : (
         <Routes>
           <Route path="/login" element={<AuthPageContainer />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/products" element={<ProductsPageContainer />} />
           </Route>
-          <Route path="/" element={<Navigate to="/products" replace />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route
+            path="/"
+            element={
+              !user ? (
+                <Navigate to="/login" replace />
+              ) : (
+                <Navigate to="/products" replace />
+              )
+            }
+          />
+          <Route path="/*" element={<NotFoundPage />} />
         </Routes>
       )}
     </>
