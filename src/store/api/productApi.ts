@@ -3,7 +3,7 @@ import {
   fetchBaseQuery,
   type FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
-import type { Product } from "../../types/product";
+import type { Product, ProductCategory } from "../../types/product";
 import type { RootState } from "../store";
 import { cleanParams, toSearchParams } from "../../lib/utils";
 
@@ -13,6 +13,8 @@ export type ProductsResponse = {
   skip: number;
   limit: number;
 };
+
+export type ProductsCategoriesResponse = ProductCategory[];
 
 export interface PaginateProductsRequest {
   limit?: string;
@@ -26,8 +28,13 @@ export interface SearchProductsRequest {
   q?: string;
 }
 
+export interface FilterProductsRequest {
+  category?: string;
+}
+
 export type SearchProductsUniversalRequest = PaginateProductsRequest &
-  SearchProductsRequest;
+  SearchProductsRequest &
+  FilterProductsRequest;
 
 export const productApi = createApi({
   reducerPath: "protuctApi",
@@ -48,6 +55,20 @@ export const productApi = createApi({
   endpoints: (builder) => ({
     getProducts: builder.query<ProductsResponse, void>({
       query: () => "/products",
+      transformResponse: (response: ProductsResponse) => {
+        if (typeof response === "string") {
+          try {
+            return JSON.parse(response);
+          } catch (e) {
+            throw new Error(`Failed to parse response: ${e}`);
+          }
+        } else {
+          return response;
+        }
+      },
+    }),
+    getProductsCategories: builder.query<ProductsCategoriesResponse, void>({
+      query: () => "/products/categories",
       transformResponse: (response: ProductsResponse) => {
         if (typeof response === "string") {
           try {
@@ -101,8 +122,11 @@ export const productApi = createApi({
       queryFn: async (params, _2, _3, baseQuery) => {
         let url: string;
         const searchParams = toSearchParams(params as Record<string, unknown>);
+
         if (params.q) {
           url = `/products/search?${searchParams}`;
+        } else if (params.category) {
+          url = `/products/category/${params.category}?${searchParams}`;
         } else {
           url = `/products?${searchParams}`;
         }
@@ -170,4 +194,5 @@ export const {
   useLazySearchProductsUniversalQuery,
   usePostProductMutation,
   usePutProductMutation,
+  useLazyGetProductsCategoriesQuery,
 } = productApi;

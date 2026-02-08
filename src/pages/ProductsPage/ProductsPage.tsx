@@ -70,6 +70,10 @@ const ProductsPage: FC<ProductsPageProps> = ({ data }) => {
         onAddRow={data.onAddRow}
         onEditRow={data.onEditRow}
         onRefresh={data.onRefresh}
+        onFilter={data.onFilter}
+        onClear={data.onClear}
+        filterFields={data.filterFields}
+        filterItems={data.filterItems}
         columns={[
           {
             minWidth: 200,

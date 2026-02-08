@@ -45,3 +45,9 @@ interface Dimensions {
 }
 
 export type Level = "low" | "medium" | "high";
+
+export interface ProductCategory {
+  slug: string;
+  name: string;
+  url: string;
+}

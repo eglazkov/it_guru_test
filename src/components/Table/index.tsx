@@ -17,12 +17,34 @@ import ArrowsClockwiseIcon from "../../assets/ArrowsClockwiseIcon.svg?react";
 import PlusSingIcon from "../../assets/PlusSingIcon.svg?react";
 import DotsThreeCircleIcon from "../../assets/DotsThreeCircleIcon.svg?react";
 import AddRow from "../AddRow";
+import Select from "../Select";
 
 export type OnSortCallback<T> = (params: SortState<T>) => void;
 export type OnPaginationCallback = (page: number) => void;
 export type OnAddRowCallback<T> = (row: T) => void;
 export type OnEditRowCallback<T> = (row: T) => Promise<unknown>;
 export type OnRefreshCallback = () => void;
+export type OnFilterCallback = (filter: FilterSelected) => void;
+export type OnClearCallback = () => void;
+
+type FilterItem = {
+  id?: string;
+  value: string;
+  title: string;
+};
+
+type FilterSelected = {
+  value: string;
+  filterField: string;
+};
+
+export type FilterItems<T> = Partial<Record<keyof T & string, FilterItem[]>>;
+
+export type FilterFieldItem<T> = {
+  id: string;
+  value: keyof T & string;
+  title: string;
+};
 
 interface TableProps<T> {
   id: string;
@@ -38,11 +60,15 @@ interface TableProps<T> {
   rowsCount: number;
   totalCount: number;
   currentPage: number;
+  filterFields: FilterFieldItem<T>[];
+  filterItems: FilterItems<T>;
   onSort?: OnSortCallback<T>;
   onPagination?: OnPaginationCallback;
   onAddRow?: OnAddRowCallback<T>;
   onEditRow?: OnEditRowCallback<T>;
   onRefresh?: OnRefreshCallback;
+  onFilter?: OnFilterCallback;
+  onClear?: OnClearCallback;
 }
 
 interface Column<T> {
@@ -74,13 +100,19 @@ const Table = <T extends Record<string, any>>({
   rowsCount,
   currentPage,
   totalCount,
+  filterFields = [],
+  filterItems = {},
   onSort,
   onPagination,
   onAddRow,
   onEditRow,
   onRefresh,
+  onFilter,
+  onClear,
 }: TableProps<T>) => {
   type Key = Column<T>["key"];
+
+  const filterFieldsMemoized = useMemo(() => filterFields, []);
 
   const [sort, setSort] = useState<SortState<T>>({
     key: "",
@@ -105,6 +137,7 @@ const Table = <T extends Record<string, any>>({
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [showAddRow, setShowAddRow] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const [editRowId, setEditRowId] = useState<number | undefined>(undefined);
   // const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(totalCount / rowsCount);
@@ -276,6 +309,10 @@ const Table = <T extends Record<string, any>>({
     setEditRowId(id);
   };
 
+  const filtersToggle = () => {
+    setShowFilter((prev) => !prev);
+  };
+
   return (
     <div
       className={cn(
@@ -289,6 +326,7 @@ const Table = <T extends Record<string, any>>({
           <div className="flex flex-row gap-8 mob:self-end mob:mt-10">
             {onRefresh && (
               <Button
+                title="Обновить"
                 className="w-fit py-16 px-20 mob:px-10 mob:py-8"
                 kind="outlined"
                 onClick={onRefresh}
@@ -296,14 +334,18 @@ const Table = <T extends Record<string, any>>({
                 <ArrowsClockwiseIcon />
               </Button>
             )}
-            <Button
-              className="w-fit py-16 px-20 mob:px-10 mob:py-8"
-              kind="outlined"
-            >
-              <FiltersIcon />
-            </Button>
+            {!!filterFieldsMemoized.length && onFilter && (
+              <Button
+                title="Фильтрация"
+                className="w-fit py-16 px-20 mob:px-10 mob:py-8"
+                kind="outlined"
+              >
+                <FiltersIcon onClick={filtersToggle} />
+              </Button>
+            )}
             {onAddRow && (
               <Button
+                title="Добавить запись"
                 className="w-fit py-16 px-20 mob:px-10 mob:py-8"
                 onClick={addRow}
               >
@@ -316,8 +358,35 @@ const Table = <T extends Record<string, any>>({
           </div>
         )}
       </div>
-      {showProgress && (
-        <div className="absolute top-110 mob:top-116 w-fill pr-30 mob:pr-10">
+      {showFilter && (
+        <div className="flex flex-row justify-between items-center">
+          <div className="flex flex-row gap-10">
+            {filterFieldsMemoized.map((filter) => (
+              <Select
+                key={filter.id}
+                id={filter.id}
+                label={filter.title}
+                options={filterItems?.[filter.value] || []}
+                onChange={(value) =>
+                  onFilter?.({ value, filterField: filter.value })
+                }
+              />
+            ))}
+          </div>
+          <Button
+            className="w-fit px-10 py-6 text-[16px]"
+            kind="outlined"
+            onClick={() => {
+              filtersToggle();
+              onClear?.();
+            }}
+          >
+            Очистить
+          </Button>
+        </div>
+      )}
+      {true && (
+        <div className={showProgress ? "visible" : "invisible"}>
           <div className="flex items-center justify-between mb-1">
             <span className="text-[18px] mob:text[16px] font-medium text-gray-700">
               Загружаем данные...
@@ -482,6 +551,7 @@ const Table = <T extends Record<string, any>>({
                         <div className="flex flex-row items-center gap-32 mr-8 justify-end">
                           {onEditRow && (
                             <button
+                              title="Редактировать запись"
                               className={cn(
                                 "inline-flex items-center justify-center cursor-pointer bg-[#242EDB] text-white text-[28px] rounded-[23px] w-52 h-28 text-center",
                                 "hover:bg-[#1E26C2] active:bg-[#191FB0] focus:ring-2 focus:ring-[#242EDB]/50 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl",

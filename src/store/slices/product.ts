@@ -1,10 +1,17 @@
 import { createSlice, isAnyOf } from "@reduxjs/toolkit";
-import { productApi, type ProductsResponse } from "../api/productApi";
+import {
+  productApi,
+  type ProductsCategoriesResponse,
+  type ProductsResponse,
+} from "../api/productApi";
 
-type InitialState = ProductsResponse;
+type InitialState = ProductsResponse & {
+  productCategories: ProductsCategoriesResponse;
+};
 
 const initialState: InitialState = {
   products: [],
+  productCategories: [],
   limit: 0,
   skip: 0,
   total: 0,
@@ -42,6 +49,12 @@ const productSlice = createSlice({
         state.products = state.products.map((product) => {
           return product.id === payload.id ? payload : product;
         });
+      },
+    );
+    builder.addMatcher(
+      productApi.endpoints.getProductsCategories.matchFulfilled,
+      (state, { payload }) => {
+        state.productCategories = payload;
       },
     );
   },

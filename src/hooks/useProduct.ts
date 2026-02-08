@@ -1,11 +1,6 @@
+import { useCallback, useEffect, useState } from "react";
 import {
-  useEffect,
-  useRef,
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
-import {
+  useLazyGetProductsCategoriesQuery,
   useLazySearchProductsUniversalQuery,
   usePostProductMutation,
   usePutProductMutation,
@@ -20,23 +15,33 @@ import type {
   OnPaginationCallback,
   OnRefreshCallback,
   OnSortCallback,
+  OnFilterCallback,
+  OnClearCallback,
+  FilterFieldItem,
+  FilterItems,
 } from "../components/Table";
 import toast from "react-hot-toast";
+import { debounceFn } from "../lib/utils";
+import { nanoid } from "@reduxjs/toolkit";
 
 export interface ProductData<T = Product> {
-  searchValue: string;
+  searchValue?: string;
   products: Product[];
   filterParams: SearchProductsUniversalRequest;
   total: number;
   isFetching: boolean;
   isUpdateRow: boolean;
   currentPage: number;
-  onSearchValueChange: Dispatch<SetStateAction<string>>;
+  filterFields: FilterFieldItem<T>[];
+  filterItems: FilterItems<T>;
+  onSearchValueChange: (value: string) => void;
   onSort?: OnSortCallback<T>;
   onPagination?: OnPaginationCallback;
   onAddRow?: OnAddRowCallback<T>;
   onEditRow?: OnEditRowCallback<T>;
   onRefresh?: OnRefreshCallback;
+  onFilter?: OnFilterCallback;
+  onClear?: OnClearCallback;
 }
 
 export const useProduct = (): ProductData<Product> => {
@@ -49,12 +54,15 @@ export const useProduct = (): ProductData<Product> => {
       skip: "0",
     });
   const [currentPage, setCurrentPage] = useState(1);
-  const isFirstRender = useRef(true);
 
   const [trigger, { isFetching }] = useLazySearchProductsUniversalQuery();
+  const [getProductCategories] = useLazyGetProductsCategoriesQuery();
+
   const [postProduct] = usePostProductMutation();
   const [putProduct, { isLoading: isUpdateRow }] = usePutProductMutation();
-  const { products, total } = useSelector((state: RootState) => state.product);
+  const { products, total, productCategories } = useSelector(
+    (state: RootState) => state.product,
+  );
 
   useEffect(() => {
     trigger(filterParams);
@@ -62,22 +70,31 @@ export const useProduct = (): ProductData<Product> => {
   }, [filterParams]);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-    }
-    const handler = setTimeout(() => {
-      if (searchValue || !isFirstRender.current) {
+    getProductCategories();
+  }, []);
+
+  const debouncedSearch = useCallback(
+    debounceFn((value) => {
+      console.log("deb", value);
+      if (value) {
         setCurrentPage(1);
         setFilterParams(({ limit }) => ({
-          q: searchValue,
+          q: value as string,
           limit,
           skip: "0",
         }));
       }
-    }, 400);
+    }, 400),
+    [setCurrentPage, setFilterParams],
+  );
 
-    return () => clearTimeout(handler);
-  }, [searchValue]);
+  const onSearchValueChange = useCallback(
+    (value: string) => {
+      setSearchValue(value);
+      debouncedSearch(value);
+    },
+    [setSearchValue, debouncedSearch],
+  );
 
   return {
     searchValue,
@@ -87,7 +104,15 @@ export const useProduct = (): ProductData<Product> => {
     isFetching,
     isUpdateRow,
     currentPage,
-    onSearchValueChange: setSearchValue,
+    filterFields: [{ id: nanoid(), value: "category", title: "Категория" }],
+    filterItems: {
+      category: productCategories?.map((category) => ({
+        id: category.slug,
+        value: category.slug,
+        title: category.name,
+      })),
+    },
+    onSearchValueChange,
     onSort: ({ direction, key }) => {
       setFilterParams((prev) => ({
         ...prev,
@@ -114,6 +139,24 @@ export const useProduct = (): ProductData<Product> => {
     },
     onRefresh: () => {
       trigger(filterParams);
+    },
+    onFilter: ({ value, filterField }) => {
+      if (searchValue) {
+        setSearchValue("");
+      }
+      if (!value) {
+        setFilterParams({ q: "", limit: "5", skip: "0" });
+        return;
+      }
+      setFilterParams((prev) => ({
+        ...prev,
+        q: "",
+        skip: "0",
+        [filterField]: value,
+      }));
+    },
+    onClear: () => {
+      setFilterParams({ q: "", limit: "5", skip: "0" });
     },
   };
 };

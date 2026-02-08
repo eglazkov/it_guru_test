@@ -5,6 +5,7 @@ interface ButtonProps {
   children: ReactNode;
   type?: "submit" | "reset" | "button" | undefined;
   className?: string;
+  title?: string;
   kind?: "default" | "outlined";
   disabled?: boolean;
   onClick?: MouseEventHandler<HTMLButtonElement>;
@@ -14,6 +15,7 @@ const Button: FC<ButtonProps> = ({
   children,
   type,
   className,
+  title = "",
   kind = "default",
   disabled = false,
   onClick,
@@ -21,6 +23,7 @@ const Button: FC<ButtonProps> = ({
   return (
     <button
       type={type}
+      title={title}
       onClick={onClick}
       disabled={disabled}
       className={cn(
