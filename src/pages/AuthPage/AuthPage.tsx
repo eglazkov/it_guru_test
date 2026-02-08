@@ -44,6 +44,7 @@ const AuthPage: FC<AuthPageProps> = ({ data }) => {
                 onChange={(e) => data.onEmailChange(e.target.value)}
                 clearable
                 disabled={data.isLoading}
+                required
               />
               <Input
                 className="mb-20"
@@ -55,6 +56,7 @@ const AuthPage: FC<AuthPageProps> = ({ data }) => {
                 value={data.password}
                 onChange={(e) => data.onPasswordChange(e.target.value)}
                 disabled={data.isLoading}
+                required
               />
               <CheckBox
                 className="mb-20"
