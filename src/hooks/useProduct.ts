@@ -75,7 +75,6 @@ export const useProduct = (): ProductData<Product> => {
 
   const debouncedSearch = useCallback(
     debounceFn((value) => {
-      console.log("deb", value);
       if (value) {
         setCurrentPage(1);
         setFilterParams(({ limit }) => ({

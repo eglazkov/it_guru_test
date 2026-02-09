@@ -1,5 +1,6 @@
-import { useState, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import ReactDOM from "react-dom";
+import Spinner from "../Spinner";
 
 interface CarouselImageProps {
   preview: string;
@@ -14,6 +15,8 @@ const CarouselImage: FC<CarouselImageProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [current, setCurrent] = useState(initialIndex);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(true);
 
   if (!images.length) {
     return <div className="w-48 h-48 bg-[#C4C4C4] rounded-[8px] flex-none" />;
@@ -21,6 +24,7 @@ const CarouselImage: FC<CarouselImageProps> = ({
 
   const open = () => {
     setCurrent(initialIndex);
+    setIsLoading(true);
     setIsOpen(true);
   };
   const close = () => setIsOpen(false);
@@ -32,15 +36,31 @@ const CarouselImage: FC<CarouselImageProps> = ({
     setCurrent((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  useEffect(() => {
+    if (!current) return;
+    setIsLoading(true);
+  }, [current]);
+
   return (
     <>
-      <div className="cursor-pointer w-48 h-48 bg-[#C4C4C4] rounded-[8px] flex-none">
+      <div className="relative cursor-pointer w-48 h-48 bg-[#C4C4C4] rounded-[8px] flex-none">
+        {isPreviewLoading && (
+          <Spinner
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            size="small"
+          />
+        )}
         <img
           src={preview}
           alt="Фото"
+          loading="lazy"
           className="w-full h-full object-cover"
           onClick={open}
+          onLoad={() => {
+            setIsPreviewLoading(false);
+          }}
           onError={(e) => {
+            setIsPreviewLoading(false);
             e.currentTarget.style.display = "none";
           }}
         />
@@ -63,8 +83,22 @@ const CarouselImage: FC<CarouselImageProps> = ({
                   ✕
                 </button>
 
-                <div className="relative w-full flex items-center justify-center bg-black/40 rounded-xl overflow-hidden">
+                <div className="relative h-[80vh] w-full flex items-center justify-center bg-black/40 rounded-xl overflow-hidden">
+                  {isLoading && (
+                    <Spinner
+                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      size="small"
+                    />
+                  )}
                   <img
+                    loading="lazy"
+                    onLoad={() => {
+                      setIsLoading(false);
+                    }}
+                    onError={() => {
+                      setIsLoading(false);
+                    }}
+                    key={images[current]}
                     src={images[current]}
                     alt={`image-${current}`}
                     className="max-h-[80vh] max-w-full object-contain select-none"
